@@ -98,8 +98,14 @@ export function RescueView({
 
   function savePlan() {
     if (!plan?.headline) return;
+    // Headline, then the steps in order, then the line to say - the same order
+    // they appear on screen, so a saved plan reads the way it was lived.
     onSavePlan(
-      [plan.headline, plan.sayThis, ...(plan.steps ?? []).map((step) => step?.action)]
+      [
+        plan.headline,
+        ...(plan.steps ?? []).map((step) => step?.action),
+        plan.sayThis,
+      ]
         .filter(Boolean)
         .join("\n"),
     );

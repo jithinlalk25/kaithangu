@@ -124,27 +124,43 @@ export function ToolkitView({
           cannot cite anything outside this list.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2">
-          {RESOURCES.map((resource) => (
-            <li key={resource.id}>
-              <a
-                href={resource.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border-border bg-card hover:bg-secondary focus-visible:ring-ring block h-full rounded-xl border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-              >
+          {RESOURCES.map((resource) => {
+            const body = (
+              <>
                 <span className="flex items-start justify-between gap-2">
                   <span className="text-sm font-medium">{resource.title}</span>
-                  <ExternalLink
-                    className="text-muted-foreground mt-0.5 size-3.5 shrink-0"
-                    aria-hidden
-                  />
+                  {resource.url ? (
+                    <ExternalLink
+                      className="text-muted-foreground mt-0.5 size-3.5 shrink-0"
+                      aria-hidden
+                    />
+                  ) : null}
                 </span>
                 <span className="text-muted-foreground mt-1 block text-xs">
                   {resource.org}
                 </span>
-              </a>
-            </li>
-          ))}
+              </>
+            );
+
+            return (
+              <li key={resource.id}>
+                {resource.url ? (
+                  <a
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border-border bg-card hover:bg-secondary focus-visible:ring-ring block h-full rounded-xl border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    {body}
+                  </a>
+                ) : (
+                  <div className="border-border bg-card block h-full rounded-xl border p-4">
+                    {body}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
 

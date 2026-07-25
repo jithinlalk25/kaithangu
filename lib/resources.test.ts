@@ -54,10 +54,15 @@ describe("resource catalogue", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("gives every resource a real https url and an organisation", () => {
+  it("gives every resource an organisation, and https when it has a url at all", () => {
     for (const resource of RESOURCES) {
-      expect(resource.url.startsWith("https://"), resource.id).toBe(true);
-      expect(resource.org.length).toBeGreaterThan(0);
+      expect(resource.org.length, resource.id).toBeGreaterThan(0);
+      expect(resource.title.length, resource.id).toBeGreaterThan(0);
+      if (resource.url) {
+        // Never http: a dead or downgraded link would break the very guarantee
+        // this catalogue exists to make. `scripts/check-links.mjs` checks they resolve.
+        expect(resource.url.startsWith("https://"), resource.id).toBe(true);
+      }
     }
   });
 

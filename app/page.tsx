@@ -101,19 +101,22 @@ export default function Home() {
 
       <main id="main" className="flex-1">
         <Tabs defaultValue="rescue" className="gap-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="rescue" className="min-h-11 px-1 text-xs sm:text-sm">
-              {t("rescue", lang)}
-            </TabsTrigger>
-            <TabsTrigger value="scripts" className="min-h-11 px-1 text-xs sm:text-sm">
-              {t("scripts", lang)}
-            </TabsTrigger>
-            <TabsTrigger value="prevent" className="min-h-11 px-1 text-xs sm:text-sm">
-              {t("prevent", lang)}
-            </TabsTrigger>
-            <TabsTrigger value="toolkit" className="min-h-11 px-1 text-xs sm:text-sm">
-              {t("toolkit", lang)}
-            </TabsTrigger>
+          {/* The list carries the height, not the triggers: sizing the trigger
+              instead makes the active one taller than its container and it
+              bulges out. h-12 keeps every tab a 44px+ tap target. */}
+          <TabsList className="grid w-full grid-cols-4 group-data-horizontal/tabs:h-12">
+            {(
+              [
+                { value: "rescue", label: t("rescue", lang) },
+                { value: "scripts", label: t("scripts", lang) },
+                { value: "prevent", label: t("prevent", lang) },
+                { value: "toolkit", label: t("toolkit", lang) },
+              ] as const
+            ).map(({ value, label }) => (
+              <TabsTrigger key={value} value={value} className="px-1 text-xs sm:text-sm">
+                {label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           {/* Each panel opens with a visually hidden h2. It keeps the document

@@ -41,16 +41,22 @@ export function Citations({
             className="border-border bg-card rounded-xl border p-4 text-sm"
           >
             <p className="text-foreground">{point}</p>
-            <a
-              href={resource.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary mt-2 inline-flex items-center gap-1.5 text-xs font-medium hover:underline"
-            >
-              {resource.org}: {resource.title}
-              <ExternalLink className="size-3" aria-hidden />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
+            {resource.url ? (
+              <a
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary mt-2 inline-flex items-center gap-1.5 text-xs font-medium hover:underline"
+              >
+                {resource.org}: {resource.title}
+                <ExternalLink className="size-3" aria-hidden />
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
+            ) : (
+              <p className="text-muted-foreground mt-2 text-xs font-medium">
+                {resource.org}: {resource.title}
+              </p>
+            )}
           </li>
         ))}
       </ul>

@@ -10,20 +10,27 @@
  * is model-generated.
  */
 
-export type ResourceId = (typeof RESOURCES)[number]["id"];
-
 export interface Resource {
   /** Stable citation key. The model may only emit these. */
   readonly id: string;
   readonly title: string;
   readonly org: string;
-  readonly url: string;
+  /**
+   * Omitted when the organisation has no reliably reachable page. A citation is
+   * a source, not necessarily a hyperlink - shipping a dead link would break the
+   * very guarantee this catalogue exists to make.
+   */
+  readonly url?: string;
   /** Shown to the model so it cites the *relevant* source, not just the first one. */
   readonly summary: string;
   readonly audience: "person" | "caregiver" | "both";
 }
 
-export const RESOURCES = [
+/**
+ * Typed as `readonly Resource[]` rather than `as const`: some entries have no
+ * url, and const-narrowing would give each literal a different shape.
+ */
+export const RESOURCES: readonly Resource[] = [
   {
     id: "nida-science",
     title: "Drugs, Brains, and Behavior: The Science of Addiction",
@@ -37,7 +44,7 @@ export const RESOURCES = [
     id: "urge-surfing",
     title: "Urge surfing and the time-limited nature of cravings",
     org: "Relapse Prevention model (Marlatt & Gordon)",
-    url: "https://www.samhsa.gov/find-help",
+    url: "https://nida.nih.gov/publications/drugs-brains-behavior-science-addiction/treatment-recovery",
     summary:
       "A craving rises, peaks and falls like a wave, usually subsiding within 15-30 minutes. Observing the urge without acting on it is more effective than trying to suppress it.",
     audience: "person",
@@ -46,7 +53,7 @@ export const RESOURCES = [
     id: "high-risk-situations",
     title: "High-risk situations and trigger mapping",
     org: "Relapse Prevention model (Marlatt & Gordon)",
-    url: "https://www.samhsa.gov/find-help",
+    url: "https://nida.nih.gov/research-topics/treatment",
     summary:
       "Most lapses happen in a small number of predictable situations: negative mood, interpersonal conflict, social pressure and celebration. Naming the situation reduces its power.",
     audience: "both",
@@ -88,19 +95,19 @@ export const RESOURCES = [
     audience: "both",
   },
   {
-    id: "samhsa-recovery",
-    title: "SAMHSA's working definition of recovery",
-    org: "Substance Abuse and Mental Health Services Administration",
-    url: "https://www.samhsa.gov/find-help/recovery",
+    id: "recovery-basics",
+    title: "Recovery: what it involves and how long it takes",
+    org: "National Institute on Drug Abuse (NIDA)",
+    url: "https://nida.nih.gov/research-topics/recovery",
     summary:
       "Recovery is built on health, home, purpose and community. It is a process of change, not a single event, and support networks are a core dimension of it.",
     audience: "both",
   },
   {
     id: "family-boundaries",
-    title: "Supporting a loved one without enabling",
-    org: "Substance Abuse and Mental Health Services Administration",
-    url: "https://www.samhsa.gov/find-help",
+    title: "Supporting a family member: family involvement in care",
+    org: "World Health Organization",
+    url: "https://www.who.int/teams/mental-health-and-substance-use",
     summary:
       "Caregivers help most by being warm about the person and firm about the behaviour: clear boundaries, no shaming, no covering up consequences, and their own support system.",
     audience: "caregiver",
@@ -109,7 +116,7 @@ export const RESOURCES = [
     id: "vimukthi",
     title: "Vimukthi - Kerala's de-addiction mission",
     org: "Kerala State Excise Department",
-    url: "https://excise.kerala.gov.in",
+    url: "https://vimukthi.kerala.gov.in",
     summary:
       "Kerala's state de-addiction programme, running district de-addiction centres, counselling and the free 14405 helpline in Malayalam and English.",
     audience: "both",
@@ -118,7 +125,7 @@ export const RESOURCES = [
     id: "telemanas",
     title: "Tele-MANAS national tele-mental-health service",
     org: "Ministry of Health and Family Welfare, Government of India",
-    url: "https://telemanas.mohfw.gov.in",
+    url: "https://www.mohfw.gov.in",
     summary:
       "Free 24x7 tele-mental-health counselling across India in regional languages, including Malayalam, on 14416.",
     audience: "both",
@@ -127,7 +134,6 @@ export const RESOURCES = [
     id: "nimhans-cam",
     title: "Centre for Addiction Medicine",
     org: "NIMHANS, Bengaluru",
-    url: "https://nimhans.ac.in",
     summary:
       "India's leading centre for addiction treatment and research; outpatient, inpatient and family-therapy services for substance use disorders.",
     audience: "both",
@@ -150,7 +156,7 @@ export const RESOURCES = [
       "Free peer-support fellowship for alcohol dependence with meetings throughout India, including Malayalam-language groups in Kerala.",
     audience: "person",
   },
-] as const satisfies readonly Resource[];
+];
 
 const RESOURCE_INDEX: ReadonlyMap<string, Resource> = new Map(
   RESOURCES.map((resource) => [resource.id, resource]),
