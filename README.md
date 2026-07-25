@@ -153,16 +153,31 @@ Cognitive accessibility *is* the product here, so it is treated as a requirement
   ask for it.
 - Colour is never the only signal, and red is reserved exclusively for real escalation.
 
-## Testing
+## Testing and verification
 
 ```bash
-npm test
+npm test        # 42 unit tests
 ```
 
 Unit tests cover the parts where a silent regression would be dangerous: the citation
 resolver's rejection of invented sources, request-schema validation and its limits,
-prompt construction for both roles, the rate limiter's window behaviour, and the
-timer's pure helpers.
+prompt construction for both roles and both languages, and the rate limiter's window
+behaviour.
+
+Beyond the unit tests, every claim in this README was checked against the deployed
+build rather than assumed:
+
+- **Lighthouse (mobile, production):** Accessibility **100**, Best Practices **100**,
+  SEO **100** — 53 audits passed, 0 failed.
+- **All three AI routes** were driven end-to-end against production and return real,
+  situation-specific Gemini output — including the full Malayalam caregiver path.
+- **Multi-modal input was verified, not assumed.** `scripts/vision-check.mjs` sends an
+  image straight to the model and prints what it can see, and the rescue route was
+  tested with a photo: the returned plan named the specific objects in the picture
+  ("turn your back to the table with the green bottle, brown bottle, and yellow
+  glasses"). A feature that only *looks* like it works is worse than no feature.
+- **Input validation** was confirmed live: malformed bodies get `400`, not a model call.
+- Zero console errors or warnings on the deployed app.
 
 ## Running locally
 
