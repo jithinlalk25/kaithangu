@@ -1,4 +1,5 @@
 import { CHIPS, HORIZONS, labelsFor, type Role } from "@/lib/catalog";
+import { summariseHistory } from "@/lib/history-stats";
 import { resourceCatalogueForPrompt } from "@/lib/resources";
 import type {
   PatternsRequest,
@@ -105,10 +106,15 @@ export function patternsSystemPrompt(role: Role, lang: "en" | "ml"): string {
     LOCAL_CONTEXT,
     LANGUAGE_RULE[lang],
     `You are reading someone's own record of the times they reached for help. Treat it as
-something they trusted you with. Report only what the entries actually show - if four of six
-were late evening, say four of six. Never invent a count, never extrapolate a trend from two
-entries, and never imply they are failing. A person who logged six cravings and acted on none
-of them is doing well, and should hear that.`,
+something they trusted you with.
+
+DO NOT DO ARITHMETIC. Exact counts are computed for you and given below under EXACT COUNTS.
+Every number you state must be copied from that block; never add up the entries yourself and
+never estimate. If a number is not in that block, do not state a number at all.
+
+Report only what the record actually shows, never extrapolate a trend from two entries, and
+never imply they are failing. A person who logged six cravings and acted on none of them is
+doing well, and should hear that.`,
     SAFETY_RULES,
     `SOURCE CATALOGUE (the only citable ids):\n${resourceCatalogueForPrompt(role)}`,
   ].join("\n\n");
@@ -133,7 +139,11 @@ export function patternsPrompt(input: PatternsRequest): string {
       input.role === "person" ? "person" : "caregiver"
     } opened Kaithangu for help, newest first.`,
     lines.join("\n"),
-    "Find what they have in common. Count precisely. Then name the one change most likely to break the strongest pattern.",
+    `EXACT COUNTS (computed precisely - quote these, do not derive your own):\n${summariseHistory(
+      input.entries,
+      input.role,
+    )}`,
+    "Decide which of these patterns matters most and why, then name the one change most likely to break it. Every count in your answer must come from the EXACT COUNTS block.",
   ].join("\n\n");
 }
 

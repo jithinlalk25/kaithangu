@@ -158,7 +158,7 @@ Cognitive accessibility *is* the product here, so it is treated as a requirement
 ## Testing and verification
 
 ```bash
-npm test        # 68 unit tests
+npm test        # 77 unit tests
 ```
 
 Unit tests cover the parts where a silent regression would be dangerous: the citation
