@@ -35,8 +35,10 @@ export function ToolkitView({
   lang: Language;
   savedPlan: string;
 }) {
+  // Keyed by role: the person a caregiver leans on is not the person someone
+  // in recovery calls before they use, and one slot would overwrite the other.
   const [anchor, setAnchor] = useLocalStorage<Anchor>(
-    "kaithangu.anchor",
+    `kaithangu.anchor.${role}`,
     NO_ANCHOR,
   );
 
@@ -51,10 +53,10 @@ export function ToolkitView({
             className="flex items-center gap-2 text-base font-medium"
           >
             <HeartHandshake className="text-primary size-5" aria-hidden />
-            {t("anchor", lang)}
+            {t(role === "caregiver" ? "anchorCaregiver" : "anchor", lang)}
           </h3>
           <p className="text-muted-foreground mt-1 text-sm">
-            {t("anchorHint", lang)}
+            {t(role === "caregiver" ? "anchorHintCaregiver" : "anchorHint", lang)}
           </p>
         </div>
 

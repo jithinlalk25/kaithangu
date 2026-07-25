@@ -21,7 +21,13 @@ import { useLocalStorage } from "@/lib/use-local-storage";
 export default function Home() {
   const [role, setRole] = useLocalStorage<Role>("kaithangu.role", "person");
   const [lang, setLang] = useLocalStorage<Language>("kaithangu.lang", "en");
-  const [savedPlan, setSavedPlan] = useLocalStorage<string>("kaithangu.plan", "");
+    // Also keyed by role, so switching never shows you a plan written for the
+  // other person. Helplines and the trust panel stay shared - those are the
+  // same for everyone.
+  const [savedPlan, setSavedPlan] = useLocalStorage<string>(
+    `kaithangu.plan.${role}`,
+    "",
+  );
 
   return (
     // `lang` marks the whole app, so a screen reader switches voice with the

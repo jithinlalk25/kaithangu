@@ -64,6 +64,11 @@ const TEXT = {
     en: "One person you will call before you use. Stored only on this device.",
     ml: "ഉപയോഗിക്കുന്നതിന് മുൻപ് വിളിക്കേണ്ട ഒരാൾ. ഈ ഫോണിൽ മാത്രം സൂക്ഷിക്കുന്നു.",
   },
+  anchorCaregiver: { en: "The person I lean on", ml: "എനിക്ക് താങ്ങാവുന്നയാൾ" },
+  anchorHintCaregiver: {
+    en: "One person you will call when this gets too heavy to carry alone. Stored only on this device.",
+    ml: "ഒറ്റയ്ക്ക് താങ്ങാനാവാതെ വരുമ്പോൾ വിളിക്കാൻ ഒരാൾ. ഈ ഫോണിൽ മാത്രം സൂക്ഷിക്കുന്നു.",
+  },
   savedPlan: { en: "My saved plan", ml: "സൂക്ഷിച്ച പ്ലാൻ" },
   savePlan: { en: "Save this plan", ml: "ഈ പ്ലാൻ സൂക്ഷിക്കൂ" },
   learn: { en: "Learn", ml: "പഠിക്കൂ" },
