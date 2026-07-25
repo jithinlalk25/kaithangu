@@ -140,7 +140,7 @@ export default function Home() {
           </TabsContent>
           <TabsContent value="toolkit">
             <h2 className="sr-only">{t("toolkit", lang)}</h2>
-            <ToolkitView lang={lang} savedPlan={savedPlan} />
+            <ToolkitView role={role} lang={lang} savedPlan={savedPlan} />
           </TabsContent>
         </Tabs>
       </main>

@@ -211,3 +211,54 @@ export const preventionSchema = z.object({
 });
 
 export type Prevention = z.infer<typeof preventionSchema>;
+
+// ---------------------------------------------------------------------------
+// Patterns - what the user's own history has in common
+// ---------------------------------------------------------------------------
+
+export const patternsRequestSchema = z.object({
+  role: roleSchema,
+  lang: languageSchema,
+  entries: z
+    .array(
+      z.object({
+        when: z.string().max(32).describe("Weekday and hour, e.g. 'Friday 21:00'."),
+        situations: chipIds,
+        feelings: chipIds,
+        places: chipIds,
+        urgency: z.string().max(16).optional(),
+      }),
+    )
+    .min(3)
+    .max(30),
+});
+
+export type PatternsRequest = z.infer<typeof patternsRequestSchema>;
+
+export const patternsSchema = z.object({
+  summary: z
+    .string()
+    .describe("Two sentences on what these moments have in common. Never shaming."),
+  patterns: z
+    .array(
+      z.object({
+        pattern: z.string().describe("The pattern, stated plainly."),
+        evidence: z
+          .string()
+          .describe("The count that supports it, e.g. '4 of your last 6'."),
+        why: z.string().describe("One line on why this combination is risky."),
+      }),
+    )
+    .describe("Two or three patterns, strongest first. Only what the data shows."),
+  riskWindow: z
+    .string()
+    .describe("The single riskiest recurring time or place, in a few words."),
+  oneAction: z
+    .string()
+    .describe("The one change with the best chance of breaking the pattern."),
+  education: z
+    .array(citationSchema)
+    .describe("One or two grounded points, each citing a catalogue source."),
+});
+
+export type Patterns = z.infer<typeof patternsSchema>;

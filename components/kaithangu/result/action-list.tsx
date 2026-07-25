@@ -2,6 +2,7 @@
 
 import type { Language } from "@/lib/catalog";
 import { secondsLabel } from "@/lib/ui-text";
+import { cn } from "@/lib/utils";
 
 /**
  * The one list shape every flow returns: a thing to do, why it works, and
@@ -21,11 +22,14 @@ export function ActionList({
   items,
   lang,
   numbered = false,
+  activeIndex = null,
 }: {
   items: readonly (Action | undefined)[];
   lang: Language;
   /** Numbered for steps done in order; plain for a set of tactics. */
   numbered?: boolean;
+  /** The step currently being read aloud, highlighted so it can be followed. */
+  activeIndex?: number | null;
 }) {
   const List = numbered ? "ol" : "ul";
 
@@ -34,7 +38,13 @@ export function ActionList({
       {items.filter(Boolean).map((item, index) => (
         <li
           key={index}
-          className="border-border bg-card flex gap-4 rounded-2xl border p-4"
+          aria-current={index === activeIndex ? "step" : undefined}
+          className={cn(
+            "flex gap-4 rounded-2xl border p-4 transition-colors",
+            index === activeIndex
+              ? "border-primary bg-primary/10"
+              : "border-border bg-card",
+          )}
         >
           {numbered ? (
             <span className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold">

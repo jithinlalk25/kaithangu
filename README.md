@@ -28,12 +28,13 @@ is short, physical, and doable without leaving the room.
 
 | Requirement | Where it lives | What it actually does |
 |---|---|---|
-| **Multi-modal** | `components/kaithangu/{chip-group,voice-input,photo-input,speak-button}.tsx` | Three real input modes — tap, speech (Web Speech API, `en-IN`/`ml-IN`), and camera → Gemini vision reads the room you are standing in. Two output modes — screen and spoken (speech synthesis). |
-| **Zero-typing interventions** | `components/kaithangu/rescue-view.tsx`, `app/api/rescue/route.ts` | A panic button, then 2–3 taps, produces a situation-specific intervention. An "I cannot answer anything" path skips even the chips. No keyboard is ever required. |
+| **Multi-modal** | `components/kaithangu/{chip-group,voice-input,photo-input,speak-button,hands-free-bar}.tsx` | Three real input modes — tap, speech (Web Speech API, `en-IN`/`ml-IN`), and camera → Gemini vision reads the room you are standing in. Two output modes — screen, and **hands-free playback** that talks you through the plan step by step, highlighting each step as it is spoken. |
+| **Zero-typing interventions** | `components/kaithangu/rescue-view.tsx`, `app/api/rescue/route.ts` | A panic button, then 2–3 taps, produces a situation-specific intervention. An "I cannot answer anything" path skips even the chips. No keyboard is ever required — and with hands-free, no reading either. |
 | **Personalised emergency scripts** | `components/kaithangu/script-view.tsx`, `app/api/script/route.ts` | The exact words to say in 8 named high-risk situations per role — in English *and* Malayalam — plus the pushbacks that actually follow ("just one, for me") with a reply for each, and a way out of the room. |
 | **Backed by educational resources** | `lib/resources.ts`, `components/kaithangu/citations.tsx` | A hand-verified catalogue of 14 sources (WHO, NIDA, SAMHSA, NIMHANS, Tele-MANAS, Kerala's Vimukthi mission, NA/AA India). The model may cite **only** these ids; anything it invents is dropped before render. See "The anti-hallucination guarantee" below. |
 | **Prevention**, not only recovery | `components/kaithangu/prevent-view.tsx`, `app/api/prevent/route.ts` | Most lapses happen in a small number of predictable situations, so the highest-leverage moment is the week before the wedding, not the craving. Name an upcoming high-risk event and get a plan: what to do before, what to do on the day, a ready-made exit line, exactly what to ask one ally for, and the early warning signs. |
 | **Contextual safety tools** | `urge-timer.tsx`, `helplines.tsx`, `toolkit-view.tsx` | A guided urge-surfing timer whose duration the model sets from the actual situation; six real, dialable Indian helplines; an "anchor person" one-tap call; a saved plan. All work with the model offline. |
+| **Learning from context over time** | `components/kaithangu/patterns-view.tsx`, `app/api/patterns/route.ts`, `lib/history.ts` | Every rescue logs the *moment* — chip ids and a timestamp, never the plan text or any free text — to `localStorage`. Once there are three, Gemini can read that record back and name what those moments have in common ("4 of your last 6 were late evening at a friend's place"), the riskiest recurring window, and the one change most likely to break it. The history is posted only when the user taps the button, is never stored server-side, and one button deletes it. |
 | **Empowers users *and* families** | `lib/catalog.ts`, `lib/prompts.ts` | A first-class caregiver mode with its own chips, its own persona ("warm about the person, firm about the behaviour"), its own scripts, and its own source subset — not a relabelled copy of the person's mode. |
 
 ---
@@ -65,7 +66,7 @@ impossible rather than merely discouraged:
 ```
 tapped chips (+ optional speech / photo)
    │
-   ▼  POST /api/rescue | /api/script | /api/prevent
+   ▼  POST /api/rescue | /api/script | /api/prevent | /api/patterns
 zod validation + per-IP rate limit         lib/schemas.ts · lib/api.ts · lib/rate-limit.ts
    │
    ▼
@@ -117,6 +118,7 @@ two cannot drift.
 | `app/api/rescue/route.ts` | `rescueSystemPrompt` + `rescuePrompt` | `rescueSchema` |
 | `app/api/script/route.ts` | `scriptSystemPrompt` + `scriptPrompt` | `scriptSchema` |
 | `app/api/prevent/route.ts` | `preventionSystemPrompt` + `preventionPrompt` | `preventionSchema` |
+| `app/api/patterns/route.ts` | `patternsSystemPrompt` + `patternsPrompt` | `patternsSchema` |
 
 Speech-to-text and text-to-speech use the browser's built-in Web Speech APIs — no audio
 leaves the device and no second vendor is involved.
@@ -156,7 +158,7 @@ Cognitive accessibility *is* the product here, so it is treated as a requirement
 ## Testing and verification
 
 ```bash
-npm test        # 55 unit tests
+npm test        # 68 unit tests
 ```
 
 Unit tests cover the parts where a silent regression would be dangerous: the citation

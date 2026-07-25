@@ -1,6 +1,7 @@
 import { CHIPS, HORIZONS, labelsFor, type Role } from "@/lib/catalog";
 import { resourceCatalogueForPrompt } from "@/lib/resources";
 import type {
+  PatternsRequest,
   PreventionRequest,
   RescueRequest,
   ScriptRequest,
@@ -95,6 +96,44 @@ jargon, no speeches. Each line must survive being said with a shaking voice in a
 The Malayalam must be how people actually speak, not a literal translation.`,
     SAFETY_RULES,
     `SOURCE CATALOGUE (the only citable ids):\n${resourceCatalogueForPrompt(role)}`,
+  ].join("\n\n");
+}
+
+export function patternsSystemPrompt(role: Role, lang: "en" | "ml"): string {
+  return [
+    persona(role),
+    LOCAL_CONTEXT,
+    LANGUAGE_RULE[lang],
+    `You are reading someone's own record of the times they reached for help. Treat it as
+something they trusted you with. Report only what the entries actually show - if four of six
+were late evening, say four of six. Never invent a count, never extrapolate a trend from two
+entries, and never imply they are failing. A person who logged six cravings and acted on none
+of them is doing well, and should hear that.`,
+    SAFETY_RULES,
+    `SOURCE CATALOGUE (the only citable ids):\n${resourceCatalogueForPrompt(role)}`,
+  ].join("\n\n");
+}
+
+export function patternsPrompt(input: PatternsRequest): string {
+  const chips = CHIPS[input.role];
+
+  const lines = input.entries.map((entry, index) => {
+    const parts = [
+      labelsFor(chips.situations, entry.situations).join("; ") || "not specified",
+      labelsFor(chips.feelings, entry.feelings).join("; ") || "not specified",
+      labelsFor(chips.places, entry.places).join("; ") || "not specified",
+    ];
+    return `${index + 1}. ${entry.when} | what: ${parts[0]} | felt: ${parts[1]} | where: ${parts[2]}${
+      entry.urgency ? ` | urgency: ${entry.urgency}` : ""
+    }`;
+  });
+
+  return [
+    `Here are the ${input.entries.length} most recent times this ${
+      input.role === "person" ? "person" : "caregiver"
+    } opened Kaithangu for help, newest first.`,
+    lines.join("\n"),
+    "Find what they have in common. Count precisely. Then name the one change most likely to break the strongest pattern.",
   ].join("\n\n");
 }
 

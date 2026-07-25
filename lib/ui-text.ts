@@ -92,6 +92,26 @@ const TEXT = {
     ml: "കൈത്താങ്ങ് ഒരു പിന്തുണയാണ്. ഇത് ചികിത്സയ്ക്ക് പകരമല്ല.",
   },
   emergencyCall: { en: "In an emergency call", ml: "അടിയന്തര ഘട്ടത്തിൽ വിളിക്കൂ" },
+  handsFree: { en: "Hands-free", ml: "കൈ ഉപയോഗിക്കാതെ" },
+  handsFreeHint: {
+    en: "Put the phone down. Kaithangu will talk you through it.",
+    ml: "ഫോൺ താഴെ വെക്കൂ. കൈത്താങ്ങ് പറഞ്ഞുതരും.",
+  },
+  playPlan: { en: "Talk me through it", ml: "എന്നോട് പറഞ്ഞുതരൂ" },
+  patterns: { en: "My patterns", ml: "എന്റെ രീതികൾ" },
+  patternsHint: {
+    en: "Kaithangu can look across the times you have asked for help and find what they have in common. Your history never leaves this device until you tap the button.",
+    ml: "നിങ്ങൾ സഹായം തേടിയ സന്ദർഭങ്ങളിൽ പൊതുവായത് കൈത്താങ്ങിന് കണ്ടെത്താം. ബട്ടൺ അമർത്തുന്നത് വരെ ചരിത്രം ഈ ഫോണിൽ തന്നെ.",
+  },
+  findPatterns: { en: "Find my patterns", ml: "എന്റെ രീതികൾ കണ്ടെത്തൂ" },
+  needMoreHistory: {
+    en: "Use the rescue button a few times and Kaithangu will start spotting patterns here.",
+    ml: "കുറച്ച് തവണ സഹായം തേടിയാൽ കൈത്താങ്ങ് ഇവിടെ രീതികൾ കണ്ടെത്തും.",
+  },
+  riskWindow: { en: "Your riskiest window", ml: "ഏറ്റവും അപകടകരമായ സമയം" },
+  oneAction: { en: "One thing to change", ml: "മാറ്റേണ്ട ഒരു കാര്യം" },
+  clearHistory: { en: "Delete my history", ml: "ചരിത്രം മായ്ക്കൂ" },
+  timesAsked: { en: "times you asked for help", ml: "തവണ സഹായം തേടി" },
 } as const satisfies Record<string, Record<Language, string>>;
 
 export type TextKey = keyof typeof TEXT;

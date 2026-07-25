@@ -3,6 +3,7 @@
 import { AlertTriangle, Ban, MessageCircle } from "lucide-react";
 
 import { Citations } from "@/components/kaithangu/citations";
+import { HandsFreeBar } from "@/components/kaithangu/hands-free-bar";
 import { Helplines } from "@/components/kaithangu/helplines";
 import { ActionList, PlainList } from "@/components/kaithangu/result/action-list";
 import { ResultSection } from "@/components/kaithangu/result/result-section";
@@ -16,7 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Language } from "@/lib/catalog";
 import type { Rescue } from "@/lib/schemas";
+import { toSpokenPlan } from "@/lib/spoken-plan";
 import { levelLabel, t } from "@/lib/ui-text";
+import { useSpeechQueue } from "@/lib/use-speech-queue";
 
 /** The streamed object, where every field may still be missing. */
 type PartialRescue = {
@@ -40,6 +43,8 @@ export function RescuePlan({
   isLoading: boolean;
   lang: Language;
 }) {
+  const { speak, stop, supported, speaking, activeSegment } = useSpeechQueue(lang);
+
   return (
     <StreamedPanel isLoading={isLoading}>
       {plan?.escalate ? (
@@ -83,9 +88,25 @@ export function RescuePlan({
         )}
       </header>
 
+      {/* Offered only once the plan is complete: half a plan read aloud is
+          worse than none, because you cannot see where it stopped. */}
+      {supported && !isLoading && plan?.headline ? (
+        <HandsFreeBar
+          lang={lang}
+          speaking={speaking}
+          onStart={() => speak(toSpokenPlan(plan, lang))}
+          onStop={stop}
+        />
+      ) : null}
+
       {plan?.steps?.length ? (
         <ResultSection heading={t("doThisNow", lang)}>
-          <ActionList items={plan.steps} lang={lang} numbered />
+          <ActionList
+            items={plan.steps}
+            lang={lang}
+            numbered
+            activeIndex={activeSegment?.stepIndex ?? null}
+          />
         </ResultSection>
       ) : (
         <PendingBlocks />

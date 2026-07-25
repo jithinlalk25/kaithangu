@@ -2,7 +2,7 @@
 
 import { useObject } from "@ai-sdk/react";
 import { LifeBuoy } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Helplines } from "@/components/kaithangu/helplines";
@@ -14,8 +14,12 @@ import {
 import { RescuePlan } from "@/components/kaithangu/rescue-plan";
 import { Button } from "@/components/ui/button";
 import type { Language, Role } from "@/lib/catalog";
+import { appendEntry, HISTORY_KEY, type HistoryEntry } from "@/lib/history";
 import { rescueSchema } from "@/lib/schemas";
 import { t } from "@/lib/ui-text";
+import { useLocalStorage } from "@/lib/use-local-storage";
+
+const NO_HISTORY: HistoryEntry[] = [];
 
 type Stage = "idle" | "context" | "result";
 
@@ -36,6 +40,15 @@ export function RescueView({
 }) {
   const [stage, setStage] = useState<Stage>("idle");
   const [context, setContext] = useState<RescueContext>(EMPTY_CONTEXT);
+  const [history, setHistory] = useLocalStorage<HistoryEntry[]>(
+    HISTORY_KEY,
+    NO_HISTORY,
+  );
+
+  /** What was actually sent, so the log records the request and not later edits. */
+  const submittedRef = useRef<RescueContext>(EMPTY_CONTEXT);
+  /** Guards against logging the same finished plan on every re-render. */
+  const loggedRef = useRef<string | null>(null);
 
   const { object: plan, submit, isLoading, clear } = useObject({
     api: "/api/rescue",
@@ -44,7 +57,27 @@ export function RescueView({
       toast.error("Could not reach Kaithangu. Check your connection and try again."),
   });
 
+  // Log the moment, not the plan: chip ids and a timestamp, on this device only.
+  // This is what "My patterns" later reads, and it never leaves until asked.
+  useEffect(() => {
+    if (isLoading || !plan?.headline || loggedRef.current === plan.headline) return;
+    loggedRef.current = plan.headline;
+    const sent = submittedRef.current;
+    setHistory(
+      appendEntry(history, {
+        at: Date.now(),
+        role,
+        situations: sent.situations,
+        feelings: sent.feelings,
+        places: sent.places,
+        urgency: plan.urgency,
+      }),
+    );
+  }, [isLoading, plan?.headline, plan?.urgency, history, role, setHistory]);
+
   function generate(from: RescueContext) {
+    submittedRef.current = from;
+    loggedRef.current = null;
     setStage("result");
     submit({
       role,

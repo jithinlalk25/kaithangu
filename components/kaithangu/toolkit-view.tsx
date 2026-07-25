@@ -4,10 +4,11 @@ import { BookOpen, ExternalLink, HeartHandshake, Phone } from "lucide-react";
 
 import { Helplines } from "@/components/kaithangu/helplines";
 import { HowItWorks } from "@/components/kaithangu/how-it-works";
+import { PatternsView } from "@/components/kaithangu/patterns-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Language } from "@/lib/catalog";
+import type { Language, Role } from "@/lib/catalog";
 import { RESOURCES } from "@/lib/resources";
 import { t } from "@/lib/ui-text";
 import { useLocalStorage } from "@/lib/use-local-storage";
@@ -25,9 +26,11 @@ const NO_ANCHOR: Anchor = { name: "", phone: "" };
  * model is called, and that keep working if every network request fails.
  */
 export function ToolkitView({
+  role,
   lang,
   savedPlan,
 }: {
+  role: Role;
   lang: Language;
   savedPlan: string;
 }) {
@@ -103,6 +106,8 @@ export function ToolkitView({
           </pre>
         </section>
       ) : null}
+
+      <PatternsView role={role} lang={lang} />
 
       <Helplines lang={lang} />
 
