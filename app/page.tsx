@@ -118,7 +118,14 @@ export default function Home() {
                 { value: "toolkit", label: t("toolkit", lang) },
               ] as const
             ).map(({ value, label }) => (
-              <TabsTrigger key={value} value={value} className="px-1 text-xs sm:text-sm">
+              <TabsTrigger
+                key={value}
+                value={value}
+                // shadcn dims inactive triggers to text-foreground/60, which
+                // fails AA against this warm palette. Full-strength text still
+                // reads as inactive because the active tab has its own pill.
+                className="text-foreground px-1 text-xs sm:text-sm"
+              >
                 {label}
               </TabsTrigger>
             ))}
