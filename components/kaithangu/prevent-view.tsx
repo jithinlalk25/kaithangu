@@ -36,14 +36,14 @@ export function PreventView({ role, lang }: { role: Role; lang: Language }) {
   const { object: plan, submit, isLoading, clear } = useObject({
     api: "/api/prevent",
     schema: preventionSchema,
-    onError: () => toast.error("Could not build the plan. Please try again."),
+    onError: () => toast.error(t("errGeneric", lang)),
   });
 
   const chips = CHIPS[role];
 
   function generate() {
     if (!event[0]) {
-      toast.error("Pick what is coming up first.");
+      toast.error(t("pickFirst", lang));
       return;
     }
     submit({

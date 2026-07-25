@@ -25,11 +25,18 @@ export default function Error({
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4">
+      {/* Bilingual and state-free on purpose: this boundary renders when the
+          app has already failed, so it must not depend on the language toggle
+          or on anything else still working. */}
       <div>
         <h1 className="text-2xl font-semibold">Something broke on our side</h1>
         <p className="text-muted-foreground mt-2">
           Not your fault, and you do not have to wait for us. These numbers are
           free and answer right now.
+        </p>
+        <p lang="ml" className="text-muted-foreground mt-2">
+          ഞങ്ങളുടെ ഭാഗത്ത് ഒരു തകരാർ. നിങ്ങളുടെ തെറ്റല്ല. ഈ നമ്പറുകൾ സൗജന്യമാണ്,
+          ഇപ്പോൾ തന്നെ വിളിക്കാം.
         </p>
       </div>
 
@@ -48,7 +55,7 @@ export default function Error({
       </ul>
 
       <Button onClick={reset} size="lg" className="min-h-12">
-        Try again
+        Try again · വീണ്ടും ശ്രമിക്കൂ
       </Button>
     </main>
   );

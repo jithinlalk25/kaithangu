@@ -54,7 +54,7 @@ export function RescueView({
     api: "/api/rescue",
     schema: rescueSchema,
     onError: () =>
-      toast.error("Could not reach Kaithangu. Check your connection and try again."),
+      toast.error(t("errGeneric", lang)),
   });
 
   // Log the moment, not the plan: chip ids and a timestamp, on this device only.
@@ -109,7 +109,7 @@ export function RescueView({
         .filter(Boolean)
         .join("\n"),
     );
-    toast.success("Saved to your safety kit, on this device only.");
+    toast.success(t("savedToKit", lang));
   }
 
   if (stage === "idle") {

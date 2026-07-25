@@ -41,7 +41,7 @@ export function PatternsView({ role, lang }: { role: Role; lang: Language }) {
   const { object: insight, submit, isLoading, clear } = useObject({
     api: "/api/patterns",
     schema: patternsSchema,
-    onError: () => toast.error("Could not read your history. Please try again."),
+    onError: () => toast.error(t("errGeneric", lang)),
   });
 
   const mine = entriesForRole(history, role);
@@ -64,7 +64,7 @@ export function PatternsView({ role, lang }: { role: Role; lang: Language }) {
   function forget() {
     setHistory(history.filter((entry) => entry.role !== role));
     clear();
-    toast.success("History deleted from this device.");
+    toast.success(t("historyDeleted", lang));
   }
 
   return (

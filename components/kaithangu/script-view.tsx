@@ -36,14 +36,14 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
   const { object: script, submit, isLoading, clear } = useObject({
     api: "/api/script",
     schema: scriptSchema,
-    onError: () => toast.error("Could not write the script. Please try again."),
+    onError: () => toast.error(t("errGeneric", lang)),
   });
 
   const chips = CHIPS[role];
 
   function generate() {
     if (!situation[0]) {
-      toast.error("Pick the situation first.");
+      toast.error(t("pickFirst", lang));
       return;
     }
     submit({

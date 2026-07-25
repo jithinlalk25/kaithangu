@@ -5,6 +5,7 @@ import { BookOpen, ExternalLink, HeartHandshake, Phone } from "lucide-react";
 import { Helplines } from "@/components/kaithangu/helplines";
 import { HowItWorks } from "@/components/kaithangu/how-it-works";
 import { PatternsView } from "@/components/kaithangu/patterns-view";
+import { VoiceInput } from "@/components/kaithangu/voice-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,7 +60,7 @@ export function ToolkitView({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="anchor-name">Name</Label>
+            <Label htmlFor="anchor-name">{t("nameLabel", lang)}</Label>
             <Input
               id="anchor-name"
               className="h-11"
@@ -68,11 +69,11 @@ export function ToolkitView({
               onChange={(event) =>
                 setAnchor({ ...anchor, name: event.target.value })
               }
-              placeholder="Amma, Rahul, my sponsor…"
+              placeholder={t("namePlaceholder", lang)}
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="anchor-phone">Phone</Label>
+            <Label htmlFor="anchor-phone">{t("phoneLabel", lang)}</Label>
             <Input
               id="anchor-phone"
               className="h-11"
@@ -87,6 +88,13 @@ export function ToolkitView({
             />
           </div>
         </div>
+
+        {/* Dictate the name instead of typing it: the anchor contact was the
+            last place in the app that required a keyboard. */}
+        <VoiceInput
+          lang={lang}
+          onTranscript={(text) => setAnchor({ ...anchor, name: text })}
+        />
 
         {dialable ? (
           <Button asChild size="lg" className="min-h-12 w-full">
@@ -121,10 +129,7 @@ export function ToolkitView({
           <BookOpen className="text-primary size-5" aria-hidden />
           {t("learn", lang)}
         </h3>
-        <p className="text-muted-foreground text-sm">
-          The complete, human-verified library Kaithangu is allowed to cite. It
-          cannot cite anything outside this list.
-        </p>
+        <p className="text-muted-foreground text-sm">{t("libraryHint", lang)}</p>
         <ul className="grid gap-2 sm:grid-cols-2">
           {RESOURCES.map((resource) => {
             const body = (
@@ -166,7 +171,7 @@ export function ToolkitView({
         </ul>
       </section>
 
-      <HowItWorks />
+      <HowItWorks lang={lang} />
     </div>
   );
 }

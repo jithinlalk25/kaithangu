@@ -28,8 +28,9 @@ is short, physical, and doable without leaving the room.
 
 | Requirement | Where it lives | What it actually does |
 |---|---|---|
+| **Zero keyboard, end to end** | `chip-group.tsx`, `voice-input.tsx`, `toolkit-view.tsx` | Every input in the app — including the anchor contact's name — can be given by tapping or speaking. The only thing you may want to type is a phone number, and that is a one-off setup step you can also dictate. |
 | **Multi-modal** | `components/kaithangu/{chip-group,voice-input,photo-input,speak-button,hands-free-bar}.tsx` | Three real input modes — tap, speech (Web Speech API, `en-IN`/`ml-IN`), and camera → Gemini vision reads the room you are standing in. Two output modes — screen, and **hands-free playback** that talks you through the plan step by step, highlighting each step as it is spoken. |
-| **Zero-typing interventions** | `components/kaithangu/rescue-view.tsx`, `app/api/rescue/route.ts` | A panic button, then 2–3 taps, produces a situation-specific intervention. An "I cannot answer anything" path skips even the chips. No keyboard is required on any AI flow, and with hands-free, no reading either. (The one place you can type is saving an anchor contact's name and number in the Safety kit — a setup step, not a crisis step.) |
+| **Zero-typing interventions** | `components/kaithangu/rescue-view.tsx`, `app/api/rescue/route.ts` | A panic button, then 2–3 taps, produces a situation-specific intervention. An "I cannot answer anything" path skips even the chips. **No keyboard is required anywhere in the app** — every flow, and the anchor contact in the Safety kit, can be driven by tap and voice alone. With hands-free playback, no reading is required either. |
 | **Personalised emergency scripts** | `components/kaithangu/script-view.tsx`, `app/api/script/route.ts` | The exact words to say in 8 named high-risk situations per role — in English *and* Malayalam — plus the pushbacks that actually follow ("just one, for me") with a reply for each, and a way out of the room. |
 | **Backed by educational resources** | `lib/resources.ts`, `components/kaithangu/citations.tsx` | A hand-verified catalogue of 14 sources (WHO, NIDA, SAMHSA, NIMHANS, Tele-MANAS, Kerala's Vimukthi mission, NA/AA India). The model may cite **only** these ids; anything it invents is dropped before render. See "The anti-hallucination guarantee" below. |
 | **Prevention**, not only recovery | `components/kaithangu/prevent-view.tsx`, `app/api/prevent/route.ts` | Most lapses happen in a small number of predictable situations, so the highest-leverage moment is the week before the wedding, not the craving. Name an upcoming high-risk event and get a plan: what to do before, what to do on the day, a ready-made exit line, exactly what to ask one ally for, and the early warning signs. |
@@ -47,11 +48,11 @@ helpline will invent a plausible phone number. In a substance-use crisis app tha
 not a quality problem, it is a safety problem. Kaithangu makes it structurally
 impossible rather than merely discouraged:
 
-1. **Helpline numbers are never generated.** Every number the app offers to dial is a
-   hand-verified constant in `lib/resources.ts`, rendered as a `tel:` link. The model
-   cannot add an entry to that list. It is not prevented from typing digits inside a
-   free-text field, so this is a guarantee about what Kaithangu *offers*, not a claim
-   that the model is incapable of producing a numeral.
+1. **Helpline numbers are never generated.** Every number Kaithangu offers to dial is a
+   hand-verified constant in `lib/resources.ts`, rendered as a `tel:` link, and the model
+   cannot add an entry to that list. Both the README and the in-app trust panel state this
+   precisely — as a guarantee about the numbers the app *offers you*, not an unenforceable
+   claim that a language model can never emit a digit.
 2. **Citations are closed-vocabulary.** The system prompt shows the model the
    catalogue and permits only its `id`s. `resolveCitations()` then looks every id up
    and silently discards misses — a fabricated source cannot reach the screen.
@@ -166,10 +167,11 @@ Cognitive accessibility *is* the product here, so it is treated as a requirement
   arrives.
 - Skip link, semantic landmarks and headings, visible focus rings throughout.
 - Every plan can be read aloud, for users who cannot read a screen in that moment.
-- Full Malayalam model output, and a Malayalam interface across every screen on the AI
-  flows. The app shell carries `lang`, so a screen reader switches voice with the toggle
-  instead of reading Malayalam with an English one. Known gap: the trust panel, the error
-  screen and the toast messages are still English-only.
+- **Full Malayalam interface and full Malayalam model output** — every screen, every
+  control, every toast and the trust panel. The app shell carries `lang`, so a screen
+  reader switches voice with the toggle instead of reading Malayalam with an English one.
+  The error boundary is bilingual by design: it renders when the app has already failed,
+  so it cannot depend on the language toggle still working.
 - `prefers-reduced-motion` is respected; the breathing animation stops for users who
   ask for it.
 - Colour is never the only signal, and red is reserved exclusively for real escalation.
@@ -177,7 +179,7 @@ Cognitive accessibility *is* the product here, so it is treated as a requirement
 ## Testing and verification
 
 ```bash
-npm test        # 79 unit tests
+npm test        # 81 unit tests
 ```
 
 Unit tests cover the parts where a silent regression would be dangerous: the citation

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { levelLabel, secondsLabel, t } from "@/lib/ui-text";
+import { ALL_TEXT, levelLabel, secondsLabel, t } from "@/lib/ui-text";
 
 describe("interface copy", () => {
   it("returns Malayalam script for the Malayalam locale", () => {
@@ -35,5 +35,25 @@ describe("duration labels", () => {
   it("rounds and localises", () => {
     expect(secondsLabel(30.4, "en")).toBe("about 30 seconds");
     expect(/[ഀ-ൿ]/.test(secondsLabel(30, "ml"))).toBe(true);
+  });
+});
+
+describe("bilingual completeness", () => {
+  it("has no English left in any Malayalam string", () => {
+    // Guards the README's "full Malayalam interface" claim. Malayalam copy that
+    // is still Latin script is an untranslated stub, and there were nine of them
+    // before this test existed.
+    const untranslated: string[] = [];
+    for (const [key, pair] of Object.entries(ALL_TEXT)) {
+      if (!/[ഀ-ൿ]/.test(pair.ml)) untranslated.push(key);
+    }
+    expect(untranslated).toEqual([]);
+  });
+
+  it("never leaves either language empty", () => {
+    for (const [key, pair] of Object.entries(ALL_TEXT)) {
+      expect(pair.en.trim(), key).not.toBe("");
+      expect(pair.ml.trim(), key).not.toBe("");
+    }
   });
 });

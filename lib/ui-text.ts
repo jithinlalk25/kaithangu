@@ -112,7 +112,65 @@ const TEXT = {
   oneAction: { en: "One thing to change", ml: "മാറ്റേണ്ട ഒരു കാര്യം" },
   clearHistory: { en: "Delete my history", ml: "ചരിത്രം മായ്ക്കൂ" },
   timesAsked: { en: "times you asked for help", ml: "തവണ സഹായം തേടി" },
+  nameLabel: { en: "Name", ml: "പേര്" },
+  phoneLabel: { en: "Phone", ml: "ഫോൺ നമ്പർ" },
+  namePlaceholder: { en: "Amma, Rahul, my sponsor…", ml: "അമ്മ, രാഹുൽ, എന്റെ സ്പോൺസർ…" },
+  sayTheName: { en: "Say the name", ml: "പേര് പറയൂ" },
+  libraryHint: {
+    en: "The complete, human-verified library Kaithangu is allowed to cite. It cannot cite anything outside this list.",
+    ml: "കൈത്താങ്ങിന് ഉദ്ധരിക്കാൻ അനുവാദമുള്ള, മനുഷ്യർ പരിശോധിച്ച മുഴുവൻ പട്ടിക. ഇതിന് പുറത്തുനിന്ന് ഒന്നും ഉദ്ധരിക്കാനാവില്ല.",
+  },
+  errGeneric: {
+    en: "Could not reach Kaithangu. Check your connection and try again.",
+    ml: "കൈത്താങ്ങുമായി ബന്ധപ്പെടാനായില്ല. കണക്ഷൻ നോക്കി വീണ്ടും ശ്രമിക്കൂ.",
+  },
+  errPhoto: {
+    en: "That image could not be read. Try another photo.",
+    ml: "ആ ചിത്രം വായിക്കാനായില്ല. മറ്റൊരു ഫോട്ടോ ശ്രമിക്കൂ.",
+  },
+  pickFirst: { en: "Choose an option first.", ml: "ആദ്യം ഒരെണ്ണം തിരഞ്ഞെടുക്കൂ." },
+  savedToKit: {
+    en: "Saved to your safety kit, on this device only.",
+    ml: "നിങ്ങളുടെ സുരക്ഷാ കിറ്റിൽ, ഈ ഫോണിൽ മാത്രം സൂക്ഷിച്ചു.",
+  },
+  historyDeleted: {
+    en: "History deleted from this device.",
+    ml: "ചരിത്രം ഈ ഫോണിൽ നിന്ന് മായ്ച്ചു.",
+  },
+  howItWorks: {
+    en: "How Kaithangu works, and what it never does",
+    ml: "കൈത്താങ്ങ് എങ്ങനെ പ്രവർത്തിക്കുന്നു, എന്തൊക്കെ ചെയ്യില്ല",
+  },
+  pipeline: { en: "The pipeline", ml: "പ്രവർത്തന ക്രമം" },
+  guarantees: { en: "Guarantees, not intentions", ml: "വാഗ്ദാനങ്ങളല്ല, ഉറപ്പുകൾ" },
+  guaranteeHelplines: {
+    en: "Every helpline shown to you is hard-coded and human-verified. The model cannot add a number to that list.",
+    ml: "കാണിക്കുന്ന എല്ലാ ഹെൽപ്പ് ലൈനുകളും മുൻകൂട്ടി പരിശോധിച്ചവയാണ്. ആ പട്ടികയിലേക്ക് മോഡലിന് ഒന്നും ചേർക്കാനാവില്ല.",
+  },
+  guaranteeCitations: {
+    en: "Invented citations are dropped before rendering.",
+    ml: "കെട്ടിച്ചമച്ച ഉദ്ധരണികൾ കാണിക്കുന്നതിന് മുൻപ് ഒഴിവാക്കുന്നു.",
+  },
+  guaranteeSafety: {
+    en: "The system prompt forbids diagnosis, dosing advice and any suggestion of controlled use, and requires escalation on signs of overdose or unsupervised withdrawal.",
+    ml: "രോഗനിർണയം, മരുന്നിന്റെ അളവ്, നിയന്ത്രിത ഉപയോഗം എന്നിവ നിർദ്ദേശിക്കുന്നത് വിലക്കിയിട്ടുണ്ട്; അപകട ലക്ഷണങ്ങളിൽ അടിയന്തര മുന്നറിയിപ്പ് നിർബന്ധമാണ്.",
+  },
+  guaranteePrivacy: {
+    en: "No account, no analytics, no server-side profile. Your anchor contact and saved plan stay in this browser.",
+    ml: "അക്കൗണ്ടില്ല, ട്രാക്കിംഗില്ല, സെർവറിൽ വിവരങ്ങളില്ല. നിങ്ങളുടെ ആശ്രയവും പ്ലാനും ഈ ഫോണിൽ തന്നെ.",
+  },
+  guaranteeKey: {
+    en: "The Gemini key lives only on the server; the browser never sees it.",
+    ml: "ജെമിനി കീ സെർവറിൽ മാത്രം; ബ്രൗസർ അത് കാണുന്നില്ല.",
+  },
+  notMedicalCare: {
+    en: "Kaithangu is a support tool, not a substitute for medical care. Withdrawal from alcohol or sedatives can be life-threatening and needs a doctor.",
+    ml: "കൈത്താങ്ങ് ഒരു പിന്തുണ മാത്രമാണ്, ചികിത്സയ്ക്ക് പകരമല്ല. മദ്യത്തിൽ നിന്നുള്ള പിൻവാങ്ങൽ ജീവന് ഭീഷണിയാകാം; ഡോക്ടറെ കാണണം.',".replace("',", '",'),
+  },
 } as const satisfies Record<string, Record<Language, string>>;
+
+/** Exposed so `ui-text.test.ts` can assert every entry is translated. */
+export const ALL_TEXT: Record<string, Record<Language, string>> = TEXT;
 
 export type TextKey = keyof typeof TEXT;
 

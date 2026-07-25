@@ -49,7 +49,7 @@ export function PhotoInput({ lang, value, onChange }: PhotoInputProps) {
     try {
       onChange(await toCompressedDataUrl(file));
     } catch {
-      toast.error("That image could not be read. Try another photo.");
+      toast.error(t("errPhoto", lang));
     } finally {
       setBusy(false);
     }
