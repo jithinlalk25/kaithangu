@@ -1,16 +1,22 @@
 "use client";
 
 import { useObject } from "@ai-sdk/react";
-import { DoorOpen, MessagesSquare, Quote, Sparkles } from "lucide-react";
+import { DoorOpen, MessagesSquare, Quote } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { ChipGroup } from "@/components/kaithangu/chip-group";
 import { Citations } from "@/components/kaithangu/citations";
+import { PlainList } from "@/components/kaithangu/result/action-list";
+import { GenerateRow } from "@/components/kaithangu/result/generate-button";
+import { ResultHeader } from "@/components/kaithangu/result/result-header";
+import { ResultSection } from "@/components/kaithangu/result/result-section";
+import { DictatedNote } from "@/components/kaithangu/result/spoken-line";
+import {
+  PendingBlocks,
+  StreamedPanel,
+} from "@/components/kaithangu/result/streamed-panel";
 import { SpeakButton } from "@/components/kaithangu/speak-button";
-import { VoiceInput } from "@/components/kaithangu/voice-input";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CHIPS, TONES, type Language, type Role } from "@/lib/catalog";
 import { scriptSchema } from "@/lib/schemas";
 import { t } from "@/lib/ui-text";
@@ -26,14 +32,13 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
   const [tone, setTone] = useState<string[]>(["firm"]);
   const [note, setNote] = useState("");
 
-  const { object, submit, isLoading, clear } = useObject({
+  const { object: script, submit, isLoading, clear } = useObject({
     api: "/api/script",
     schema: scriptSchema,
     onError: () => toast.error("Could not write the script. Please try again."),
   });
 
   const chips = CHIPS[role];
-  const script = object;
 
   function generate() {
     if (!situation[0]) {
@@ -49,6 +54,7 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
     });
   }
 
+  /** The whole script as one utterance, so it can be rehearsed by ear. */
   const spokenScript = script?.lines
     ?.map((line) => (lang === "ml" ? line?.ml : line?.en))
     .filter(Boolean)
@@ -76,48 +82,28 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
         single
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <VoiceInput
-          lang={lang}
-          onTranscript={(text) =>
-            setNote((current) => (current ? `${current} ${text}` : text))
-          }
-        />
-        <Button onClick={generate} size="lg" className="min-h-12 flex-1">
-          <Sparkles className="size-4" aria-hidden />
-          {t("makeScript", lang)}
-        </Button>
-      </div>
-      {note ? (
-        <p className="bg-secondary text-secondary-foreground rounded-lg p-3 text-sm italic">
-          “{note}”
-        </p>
-      ) : null}
+      <GenerateRow
+        label={t("makeScript", lang)}
+        lang={lang}
+        onGenerate={generate}
+        onTranscript={(text) =>
+          setNote((current) => (current ? `${current} ${text}` : text))
+        }
+      />
+      <DictatedNote note={note} />
 
       {isLoading || script ? (
-        <div aria-live="polite" aria-busy={isLoading} className="space-y-6">
-          {script?.title ? (
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-2xl font-semibold text-balance">{script.title}</h2>
-              <SpeakButton text={spokenScript} lang={lang} />
-            </div>
-          ) : (
-            <Skeleton className="h-8 w-2/3" />
-          )}
+        <StreamedPanel isLoading={isLoading}>
+          <ResultHeader title={script?.title} lang={lang}>
+            <SpeakButton text={spokenScript} lang={lang} />
+          </ResultHeader>
 
           {script?.setup ? (
             <p className="text-muted-foreground text-sm">{script.setup}</p>
           ) : null}
 
           {script?.lines?.length ? (
-            <section aria-labelledby="lines-heading" className="space-y-3">
-              <h3
-                id="lines-heading"
-                className="text-muted-foreground flex items-center gap-2 text-sm font-semibold tracking-wide uppercase"
-              >
-                <Quote className="size-4" aria-hidden />
-                {t("sayInOrder", lang)}
-              </h3>
+            <ResultSection heading={t("sayInOrder", lang)} icon={Quote}>
               <ol className="space-y-3">
                 {script.lines.filter(Boolean).map((line, index) => (
                   <li
@@ -136,23 +122,13 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
                   </li>
                 ))}
               </ol>
-            </section>
+            </ResultSection>
           ) : (
-            <div className="space-y-3">
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </div>
+            <PendingBlocks />
           )}
 
           {script?.ifTheyPush?.length ? (
-            <section aria-labelledby="push-heading" className="space-y-3">
-              <h3
-                id="push-heading"
-                className="text-muted-foreground flex items-center gap-2 text-sm font-semibold tracking-wide uppercase"
-              >
-                <MessagesSquare className="size-4" aria-hidden />
-                {t("ifTheyPush", lang)}
-              </h3>
+            <ResultSection heading={t("ifTheyPush", lang)} icon={MessagesSquare}>
               <ul className="space-y-3">
                 {script.ifTheyPush.filter(Boolean).map((exchange, index) => (
                   <li
@@ -168,42 +144,23 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
                   </li>
                 ))}
               </ul>
-            </section>
+            </ResultSection>
           ) : null}
 
           {script?.exitPlan?.length ? (
-            <section aria-labelledby="exit-heading" className="space-y-2">
-              <h3
-                id="exit-heading"
-                className="text-muted-foreground flex items-center gap-2 text-sm font-semibold tracking-wide uppercase"
-              >
-                <DoorOpen className="size-4" aria-hidden />
-                {t("exitPlan", lang)}
-              </h3>
-              <ol className="space-y-2">
-                {script.exitPlan.filter(Boolean).map((step, index) => (
-                  <li
-                    key={index}
-                    className="border-border rounded-xl border px-4 py-3 text-sm"
-                  >
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </section>
+            <ResultSection heading={t("exitPlan", lang)} icon={DoorOpen}>
+              <PlainList items={script.exitPlan} ordered dashed={false} />
+            </ResultSection>
           ) : null}
 
           {script?.afterwards ? (
-            <section className="bg-secondary/60 rounded-2xl p-4">
-              <h3 className="text-muted-foreground mb-1 text-sm font-semibold tracking-wide uppercase">
-                {t("afterwards", lang)}
-              </h3>
+            <ResultSection heading={t("afterwards", lang)} tone="muted">
               <p className="text-pretty">{script.afterwards}</p>
-            </section>
+            </ResultSection>
           ) : null}
 
           <Citations citations={script?.education} lang={lang} />
-        </div>
+        </StreamedPanel>
       ) : null}
     </div>
   );
