@@ -1,38 +1,66 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 /**
  * Persist a small value on the device.
  *
- * Deliberately localStorage and not a database: nothing about a person's
- * relapse triggers or their anchor contact leaves their own phone. There is no
- * account, no server-side profile and nothing to breach.
+ * Deliberately localStorage and not a database: nothing about a person's relapse
+ * triggers or their anchor contact leaves their own phone. There is no account,
+ * no server-side profile and nothing to breach.
+ *
+ * Implemented with `useSyncExternalStore` so the server snapshot (nothing stored)
+ * and the client snapshot can differ without a hydration mismatch, and without
+ * setting state inside an effect.
  */
+
+/** Fired on the current tab; the native `storage` event only reaches other tabs. */
+const LOCAL_WRITE_EVENT = "kaithangu:local-write";
+
+function subscribe(onChange: () => void): () => void {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(LOCAL_WRITE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(LOCAL_WRITE_EVENT, onChange);
+  };
+}
+
 export function useLocalStorage<T>(
   key: string,
-  initialValue: T,
+  fallback: T,
 ): [T, (value: T) => void] {
-  const [value, setValue] = useState<T>(initialValue);
+  const raw = useSyncExternalStore(
+    subscribe,
+    () => {
+      try {
+        return window.localStorage.getItem(key);
+      } catch {
+        // Storage blocked (private mode); behave as if nothing is stored.
+        return null;
+      }
+    },
+    () => null,
+  );
 
-  // Read after mount so server and client render the same first paint.
-  useEffect(() => {
+  const value = useMemo(() => {
+    if (raw === null) return fallback;
     try {
-      const stored = window.localStorage.getItem(key);
-      if (stored !== null) setValue(JSON.parse(stored) as T);
+      return JSON.parse(raw) as T;
     } catch {
-      // Corrupt or unavailable storage (private mode) - keep the default.
+      return fallback;
     }
-  }, [key]);
+  }, [raw, fallback]);
 
   const store = useCallback(
     (next: T) => {
-      setValue(next);
       try {
         window.localStorage.setItem(key, JSON.stringify(next));
       } catch {
-        // Storage full or blocked; the in-memory value still works this session.
+        // Storage full or blocked - nothing useful to do, and never worth
+        // interrupting someone mid-craving with an error about it.
       }
+      window.dispatchEvent(new Event(LOCAL_WRITE_EVENT));
     },
     [key],
   );

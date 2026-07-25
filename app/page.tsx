@@ -1,8 +1,8 @@
 "use client";
 
 import { HeartPulse, Users } from "lucide-react";
-import { useState } from "react";
 
+import { PreventView } from "@/components/kaithangu/prevent-view";
 import { RescueView } from "@/components/kaithangu/rescue-view";
 import { ScriptView } from "@/components/kaithangu/script-view";
 import { ToolkitView } from "@/components/kaithangu/toolkit-view";
@@ -101,14 +101,17 @@ export default function Home() {
 
       <main id="main" className="flex-1">
         <Tabs defaultValue="rescue" className="gap-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="rescue" className="min-h-11">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="rescue" className="min-h-11 px-1 text-xs sm:text-sm">
               {t("rescue", lang)}
             </TabsTrigger>
-            <TabsTrigger value="scripts" className="min-h-11">
+            <TabsTrigger value="scripts" className="min-h-11 px-1 text-xs sm:text-sm">
               {t("scripts", lang)}
             </TabsTrigger>
-            <TabsTrigger value="toolkit" className="min-h-11">
+            <TabsTrigger value="prevent" className="min-h-11 px-1 text-xs sm:text-sm">
+              {t("prevent", lang)}
+            </TabsTrigger>
+            <TabsTrigger value="toolkit" className="min-h-11 px-1 text-xs sm:text-sm">
               {t("toolkit", lang)}
             </TabsTrigger>
           </TabsList>
@@ -125,6 +128,9 @@ export default function Home() {
           </TabsContent>
           <TabsContent value="scripts">
             <ScriptView key={`script-${role}-${lang}`} role={role} lang={lang} />
+          </TabsContent>
+          <TabsContent value="prevent">
+            <PreventView key={`prevent-${role}-${lang}`} role={role} lang={lang} />
           </TabsContent>
           <TabsContent value="toolkit">
             <ToolkitView lang={lang} savedPlan={savedPlan} />

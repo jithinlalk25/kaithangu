@@ -50,7 +50,13 @@ export function UrgeTimer({
   const [remaining, setRemaining] = useState(total);
   const [running, setRunning] = useState(false);
 
-  useEffect(() => setRemaining(total), [total]);
+  // Adjust state during render when the model streams in a new duration - the
+  // React-recommended alternative to resetting state from an effect.
+  const [previousTotal, setPreviousTotal] = useState(total);
+  if (previousTotal !== total) {
+    setPreviousTotal(total);
+    setRemaining(total);
+  }
 
   useEffect(() => {
     if (!running || remaining <= 0) return;
@@ -111,7 +117,14 @@ export function UrgeTimer({
 
       <Button
         type="button"
-        onClick={() => (done ? (setRemaining(total), setRunning(true)) : setRunning(!running))}
+        onClick={() => {
+          if (done) {
+            setRemaining(total);
+            setRunning(true);
+            return;
+          }
+          setRunning(!running);
+        }}
         className="min-h-12 w-full"
         size="lg"
       >

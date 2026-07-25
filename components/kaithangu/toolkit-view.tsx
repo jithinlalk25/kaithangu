@@ -17,6 +17,9 @@ export interface Anchor {
   phone: string;
 }
 
+/** Module-level so its identity is stable across renders of the hook. */
+const NO_ANCHOR: Anchor = { name: "", phone: "" };
+
 /**
  * The always-available half of the app: the things that must work before any
  * model is called, and that keep working if every network request fails.
@@ -28,10 +31,10 @@ export function ToolkitView({
   lang: Language;
   savedPlan: string;
 }) {
-  const [anchor, setAnchor] = useLocalStorage<Anchor>("kaithangu.anchor", {
-    name: "",
-    phone: "",
-  });
+  const [anchor, setAnchor] = useLocalStorage<Anchor>(
+    "kaithangu.anchor",
+    NO_ANCHOR,
+  );
 
   const dialable = anchor.phone.replace(/[^0-9+]/g, "");
 

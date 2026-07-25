@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Language } from "@/lib/catalog";
 import { t } from "@/lib/ui-text";
+import { useHydrated } from "@/lib/use-hydrated";
 
 /**
  * Read the plan out loud.
@@ -22,13 +23,12 @@ export function SpeakButton({
   lang: Language;
 }) {
   const [speaking, setSpeaking] = useState(false);
-  const [supported, setSupported] = useState(false);
+  const hydrated = useHydrated();
 
-  useEffect(() => {
-    setSupported(typeof window !== "undefined" && "speechSynthesis" in window);
-    return () => window.speechSynthesis?.cancel();
-  }, []);
+  // Never leave the page still talking after the component goes away.
+  useEffect(() => () => window.speechSynthesis?.cancel(), []);
 
+  const supported = hydrated && "speechSynthesis" in window;
   if (!supported || !text) return null;
 
   function toggle() {

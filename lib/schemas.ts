@@ -150,3 +150,64 @@ export const scriptSchema = z.object({
 });
 
 export type Script = z.infer<typeof scriptSchema>;
+
+// ---------------------------------------------------------------------------
+// Prevention - the other half of the brief
+// ---------------------------------------------------------------------------
+
+export const preventionRequestSchema = z.object({
+  role: roleSchema,
+  lang: languageSchema,
+  /** A chip id from `CHIPS[role].upcoming`. */
+  event: z.string().min(1).max(64),
+  /** A chip id from `HORIZONS` - how soon the event is. */
+  horizon: z.string().min(1).max(32),
+  worries: chipIds,
+  note: z.string().max(LIMITS.maxNoteChars).optional(),
+});
+
+export type PreventionRequest = z.infer<typeof preventionRequestSchema>;
+
+export const preventionSchema = z.object({
+  title: z.string().describe("Short name for this plan."),
+  riskLevel: z
+    .enum(["low", "moderate", "high"])
+    .describe("How risky this specific event is for this specific person."),
+  riskReason: z
+    .string()
+    .describe("One line naming what exactly makes it risky."),
+  before: z
+    .array(
+      z.object({
+        action: z.string().describe("One concrete thing to do beforehand."),
+        when: z.string().describe("When to do it, e.g. 'the night before'."),
+        why: z.string().describe("One short line on what this prevents."),
+      }),
+    )
+    .describe("Three or four preparation steps, ordered by when they happen."),
+  during: z
+    .array(
+      z.object({
+        action: z.string().describe("One concrete thing to do in the moment."),
+        why: z.string().describe("One short line on why it works."),
+      }),
+    )
+    .describe("Three steps for the event itself."),
+  exitLine: z
+    .string()
+    .describe("A ready-made sentence for leaving early without a scene."),
+  allyAsk: z
+    .string()
+    .describe("Exactly what to ask one trusted person to do on the day."),
+  warningSigns: z
+    .array(z.string())
+    .describe("Two or three early signals that this is going wrong."),
+  afterwards: z
+    .string()
+    .describe("One line on what to do once the event is over."),
+  education: z
+    .array(citationSchema)
+    .describe("One or two grounded points, each citing a catalogue source."),
+});
+
+export type Prevention = z.infer<typeof preventionSchema>;

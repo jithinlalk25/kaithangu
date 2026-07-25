@@ -1,6 +1,10 @@
-import { CHIPS, labelsFor, type Role } from "@/lib/catalog";
+import { CHIPS, HORIZONS, labelsFor, type Role } from "@/lib/catalog";
 import { resourceCatalogueForPrompt } from "@/lib/resources";
-import type { RescueRequest, ScriptRequest } from "@/lib/schemas";
+import type {
+  PreventionRequest,
+  RescueRequest,
+  ScriptRequest,
+} from "@/lib/schemas";
 
 /**
  * Every prompt the app sends lives here as a pure function of validated input.
@@ -92,6 +96,41 @@ The Malayalam must be how people actually speak, not a literal translation.`,
     SAFETY_RULES,
     `SOURCE CATALOGUE (the only citable ids):\n${resourceCatalogueForPrompt(role)}`,
   ].join("\n\n");
+}
+
+export function preventionSystemPrompt(role: Role, lang: "en" | "ml"): string {
+  return [
+    persona(role),
+    LOCAL_CONTEXT,
+    LANGUAGE_RULE[lang],
+    `This is prevention, not rescue: the event has not happened yet, so the reader has calm and
+time. Use it. Plan backwards from the event, make every step something a specific person can
+actually arrange in an Indian family or workplace, and assume they cannot simply refuse to
+attend. Protecting the relationship matters as much as protecting the recovery.`,
+    SAFETY_RULES,
+    `SOURCE CATALOGUE (the only citable ids):\n${resourceCatalogueForPrompt(role)}`,
+  ].join("\n\n");
+}
+
+export function preventionPrompt(input: PreventionRequest): string {
+  const chips = CHIPS[input.role];
+  const event =
+    chips.upcoming.find((chip) => chip.id === input.event)?.en ?? input.event;
+  const horizon =
+    HORIZONS.find((chip) => chip.id === input.horizon)?.en ?? input.horizon;
+  const worries = labelsFor(chips.feelings, input.worries);
+
+  return [
+    input.role === "person"
+      ? `Build a prevention plan for a person in recovery facing this: ${event}.`
+      : `Build a prevention plan for a caregiver preparing for this: ${event}.`,
+    `When: ${horizon}.`,
+    worries.length ? `What they are already feeling about it: ${worries.join("; ")}` : "",
+    input.note?.trim() ? `In their own words: "${input.note.trim()}"` : "",
+    "Rate the risk honestly for this exact combination - do not default to moderate.",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function scriptPrompt(input: ScriptRequest): string {

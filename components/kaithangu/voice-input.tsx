@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Language } from "@/lib/catalog";
 import { t } from "@/lib/ui-text";
+import { useHydrated } from "@/lib/use-hydrated";
 
 /**
  * Speech input, so the user never has to type.
@@ -53,14 +54,14 @@ interface VoiceInputProps {
 }
 
 export function VoiceInput({ lang, onTranscript }: VoiceInputProps) {
-  const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const hydrated = useHydrated();
 
-  useEffect(() => {
-    setSupported(Boolean(getRecognitionConstructor()));
-    return () => recognitionRef.current?.stop();
-  }, []);
+  // Stop the microphone if the user navigates away mid-sentence.
+  useEffect(() => () => recognitionRef.current?.stop(), []);
+
+  const supported = hydrated && Boolean(getRecognitionConstructor());
 
   function toggle() {
     if (listening) {

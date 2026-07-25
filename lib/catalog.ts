@@ -21,6 +21,8 @@ interface RoleChips {
   readonly feelings: readonly Chip[];
   readonly places: readonly Chip[];
   readonly scriptSituations: readonly Chip[];
+  /** The prevention half: high-risk events that are coming, not happening. */
+  readonly upcoming: readonly Chip[];
 }
 
 const PERSON: RoleChips = {
@@ -61,6 +63,16 @@ const PERSON: RoleChips = {
     { id: "ask-for-help", en: "I need to ask my family for help", ml: "കുടുംബത്തോട് സഹായം ചോദിക്കണം" },
     { id: "festival", en: "A wedding or festival at home", ml: "വീട്ടിൽ കല്യാണം / ഉത്സവം" },
     { id: "repeated-pressure", en: "Someone will not stop pressuring me", ml: "ആരോ നിർബന്ധിച്ചുകൊണ്ടിരിക്കുന്നു" },
+  ],
+  upcoming: [
+    { id: "wedding", en: "A wedding or family function", ml: "കല്യാണം / കുടുംബ പരിപാടി" },
+    { id: "office-party", en: "An office party", ml: "ഓഫീസ് പാർട്ടി" },
+    { id: "payday", en: "Payday", ml: "ശമ്പളം കിട്ടുന്ന ദിവസം" },
+    { id: "festival-season", en: "Onam or Christmas season", ml: "ഓണം / ക്രിസ്മസ് കാലം" },
+    { id: "old-friends", en: "Meeting old friends", ml: "പഴയ കൂട്ടുകാരെ കാണുന്നു" },
+    { id: "back-to-work", en: "First day back at work", ml: "ജോലിയിലേക്ക് മടങ്ങുന്ന ദിവസം" },
+    { id: "travelling-alone", en: "Travelling alone", ml: "ഒറ്റയ്ക്ക് യാത്ര" },
+    { id: "empty-weekend", en: "A long weekend with nothing planned", ml: "ഒന്നും ചെയ്യാനില്ലാത്ത അവധി" },
   ],
 };
 
@@ -103,12 +115,30 @@ const CAREGIVER: RoleChips = {
     { id: "call-for-help", en: "Calling for emergency help", ml: "അടിയന്തര സഹായം വിളിക്കണം" },
     { id: "protect-myself", en: "Protecting my own wellbeing", ml: "എന്റെ ആരോഗ്യം സംരക്ഷിക്കണം" },
   ],
+  upcoming: [
+    { id: "function-with-alcohol", en: "A family function with alcohol", ml: "മദ്യമുള്ള കുടുംബ പരിപാടി" },
+    { id: "home-from-treatment", en: "They are coming home from treatment", ml: "ചികിത്സ കഴിഞ്ഞ് വീട്ടിലെത്തുന്നു" },
+    { id: "payday-at-home", en: "Payday at home", ml: "വീട്ടിൽ ശമ്പളം വരുന്ന ദിവസം" },
+    { id: "festival-at-home", en: "Festival season at home", ml: "വീട്ടിലെ ഉത്സവക്കാലം" },
+    { id: "relatives-visiting", en: "Relatives are visiting", ml: "ബന്ധുക്കൾ വരുന്നു" },
+    { id: "i-must-travel", en: "I have to travel and leave them", ml: "ഞാൻ യാത്ര പോകേണ്ടി വരുന്നു" },
+    { id: "work-crisis", en: "A court date or work crisis", ml: "കോടതി / ജോലി പ്രതിസന്ധി" },
+    { id: "anniversary", en: "A birthday or anniversary", ml: "പിറന്നാൾ / വാർഷികം" },
+  ],
 };
 
 export const CHIPS: Record<Role, RoleChips> = {
   person: PERSON,
   caregiver: CAREGIVER,
 };
+
+/** How far away the upcoming high-risk event is. */
+export const HORIZONS: readonly Chip[] = [
+  { id: "today", en: "Later today", ml: "ഇന്ന് പിന്നീട്" },
+  { id: "tomorrow", en: "Tomorrow", ml: "നാളെ" },
+  { id: "this-week", en: "This week", ml: "ഈ ആഴ്ച" },
+  { id: "this-month", en: "This month", ml: "ഈ മാസം" },
+];
 
 export const TONES: readonly Chip[] = [
   { id: "firm", en: "Firm", ml: "ഉറച്ച" },
