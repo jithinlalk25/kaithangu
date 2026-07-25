@@ -116,7 +116,7 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
                 className="text-muted-foreground flex items-center gap-2 text-sm font-semibold tracking-wide uppercase"
               >
                 <Quote className="size-4" aria-hidden />
-                Say this, in order
+                {t("sayInOrder", lang)}
               </h3>
               <ol className="space-y-3">
                 {script.lines.filter(Boolean).map((line, index) => (

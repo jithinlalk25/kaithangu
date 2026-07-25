@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CHIPS, type Language, type Role } from "@/lib/catalog";
 import { rescueSchema } from "@/lib/schemas";
-import { t } from "@/lib/ui-text";
+import { levelLabel, secondsLabel, t } from "@/lib/ui-text";
 
 type Stage = "idle" | "context" | "result";
 
@@ -100,7 +100,7 @@ export function RescueView({
             onClick={() => start(true)}
             className="text-muted-foreground mt-2 min-h-11 text-sm"
           >
-            I cannot answer anything — just help me
+            {t("cannotAnswer", lang)}
           </Button>
         </div>
 
@@ -137,7 +137,7 @@ export function RescueView({
 
         <div className="border-border space-y-3 rounded-2xl border border-dashed p-4">
           <p className="text-muted-foreground text-sm">
-            {t("optional", lang)} — say it out loud, or show Kaithangu the room.
+            {t("optionalHint", lang)}
           </p>
           <div className="flex flex-wrap gap-2">
             <VoiceInput
@@ -158,7 +158,7 @@ export function RescueView({
         <div className="flex gap-3">
           <Button variant="outline" onClick={reset} className="min-h-12">
             <ArrowLeft className="size-4" aria-hidden />
-            Back
+            {t("back", lang)}
           </Button>
           <Button onClick={generate} size="lg" className="min-h-12 flex-1">
             <Sparkles className="size-4" aria-hidden />
@@ -186,7 +186,7 @@ export function RescueView({
             <AlertTriangle className="text-destructive mt-0.5 size-5 shrink-0" aria-hidden />
             <div>
               <p className="text-destructive font-semibold">
-                This needs more than an app right now
+                {t("needsMore", lang)}
               </p>
               <p className="text-sm">{plan.escalateReason}</p>
             </div>
@@ -202,7 +202,7 @@ export function RescueView({
 
           {plan?.urgency ? (
             <Badge variant={plan.urgency === "critical" ? "destructive" : "secondary"}>
-              {plan.urgency}
+              {levelLabel(plan.urgency, lang)}
             </Badge>
           ) : null}
 
@@ -242,7 +242,7 @@ export function RescueView({
                     ) : null}
                     {step?.seconds ? (
                       <p className="text-muted-foreground mt-1 text-xs tabular-nums">
-                        about {Math.round(step.seconds)} seconds
+                        {secondsLabel(step.seconds, lang)}
                       </p>
                     ) : null}
                   </div>

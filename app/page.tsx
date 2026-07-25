@@ -140,8 +140,11 @@ export default function Home() {
 
       <footer className="text-muted-foreground mt-12 space-y-1 text-center text-xs">
         <p>
-          Kaithangu supports recovery. It does not replace medical care. In an
-          emergency call <a className="underline" href="tel:112">112</a>.
+          {t("disclaimer", lang)} {t("emergencyCall", lang)}{" "}
+          <a className="underline" href="tel:112">
+            112
+          </a>
+          .
         </p>
         <p>Built for PromptWars Kerala · Gemini + Next.js</p>
       </footer>

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CHIPS, HORIZONS, type Language, type Role } from "@/lib/catalog";
 import { preventionSchema } from "@/lib/schemas";
-import { t } from "@/lib/ui-text";
+import { levelLabel, t } from "@/lib/ui-text";
 
 /**
  * Prevention: the plan you make while you still can.
@@ -106,7 +106,7 @@ export function PreventView({ role, lang }: { role: Role; lang: Language }) {
               <h2 className="text-2xl font-semibold text-balance">{plan.title}</h2>
               {plan.riskLevel ? (
                 <Badge variant={plan.riskLevel === "high" ? "destructive" : "secondary"}>
-                  {plan.riskLevel} risk
+                  {levelLabel(plan.riskLevel, lang)}
                 </Badge>
               ) : null}
             </div>

@@ -71,7 +71,7 @@ export function PhotoInput({ lang, value, onChange }: PhotoInputProps) {
           className="min-h-11"
         >
           <X className="size-4" aria-hidden />
-          Remove photo
+          {t("removePhoto", lang)}
         </Button>
       </div>
     );
@@ -79,13 +79,16 @@ export function PhotoInput({ lang, value, onChange }: PhotoInputProps) {
 
   return (
     <>
+      {/* Hidden from assistive tech and the tab order: the visible button below
+          is the real control, and exposing both announces the option twice. */}
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
         capture="environment"
         className="sr-only"
-        aria-label={t("photo", lang)}
+        tabIndex={-1}
+        aria-hidden="true"
         onChange={(event) => void handleFile(event.target.files?.[0])}
       />
       <Button
@@ -96,7 +99,7 @@ export function PhotoInput({ lang, value, onChange }: PhotoInputProps) {
         className="min-h-11"
       >
         <Camera className="size-4" aria-hidden />
-        {busy ? "Reading photo…" : t("photo", lang)}
+        {busy ? t("readingPhoto", lang) : t("photo", lang)}
       </Button>
     </>
   );

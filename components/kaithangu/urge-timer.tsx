@@ -83,16 +83,20 @@ export function UrgeTimer({
         className="relative flex size-40 items-center justify-center"
         aria-hidden
       >
+        {/* Progress sweep: a conic gradient masked into a ring. */}
         <div
-          className="bg-primary/10 absolute inset-0 rounded-full transition-transform duration-1000 ease-in-out"
+          className="absolute inset-0 rounded-full transition-[background] duration-1000 ease-linear"
           style={{
-            transform: `scale(${running && phase === "inhale" ? 1 : running && phase === "exhale" ? 0.72 : 0.86})`,
+            background: `conic-gradient(var(--primary) ${progress * 360}deg, var(--border) 0deg)`,
+            mask: "radial-gradient(circle, transparent 63%, black 64%)",
+            WebkitMask: "radial-gradient(circle, transparent 63%, black 64%)",
           }}
         />
+        {/* Breathing disc: expands on the in-breath, contracts on the out. */}
         <div
-          className="border-primary/30 absolute inset-0 rounded-full border-4"
+          className="bg-primary/10 absolute inset-3 rounded-full transition-transform duration-1000 ease-in-out"
           style={{
-            clipPath: `inset(${(1 - progress) * 100}% 0 0 0)`,
+            transform: `scale(${running && phase === "inhale" ? 1 : running && phase === "exhale" ? 0.72 : 0.86})`,
           }}
         />
         <div className="relative text-center">
@@ -133,7 +137,7 @@ export function UrgeTimer({
         ) : (
           <Play className="size-4" aria-hidden />
         )}
-        {done ? "Go again" : running ? "Pause" : "Start"}
+        {done ? t("goAgain", lang) : running ? t("pause", lang) : t("start", lang)}
       </Button>
     </div>
   );

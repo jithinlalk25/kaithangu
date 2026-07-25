@@ -68,10 +68,57 @@ const TEXT = {
   savePlan: { en: "Save this plan", ml: "ഈ പ്ലാൻ സൂക്ഷിക്കൂ" },
   learn: { en: "Learn", ml: "പഠിക്കൂ" },
   thinking: { en: "Kaithangu is with you…", ml: "കൈത്താങ്ങ് നിങ്ങളോടൊപ്പമുണ്ട്…" },
+  cannotAnswer: {
+    en: "I cannot answer anything — just help me",
+    ml: "എനിക്ക് ഒന്നും ഉത്തരം പറയാൻ വയ്യ — വെറുതെ സഹായിക്കൂ",
+  },
+  back: { en: "Back", ml: "തിരികെ" },
+  start: { en: "Start", ml: "തുടങ്ങൂ" },
+  pause: { en: "Pause", ml: "നിർത്തൂ" },
+  goAgain: { en: "Go again", ml: "വീണ്ടും" },
+  sayInOrder: { en: "Say this, in order", ml: "ഈ ക്രമത്തിൽ പറയൂ" },
+  removePhoto: { en: "Remove photo", ml: "ഫോട്ടോ ഒഴിവാക്കൂ" },
+  readingPhoto: { en: "Reading photo…", ml: "ഫോട്ടോ വായിക്കുന്നു…" },
+  optionalHint: {
+    en: "Optional — say it out loud, or show Kaithangu the room.",
+    ml: "നിർബന്ധമില്ല — ഉറക്കെ പറയാം, അല്ലെങ്കിൽ ചുറ്റുപാട് കാണിക്കാം.",
+  },
+  needsMore: {
+    en: "This needs more than an app right now",
+    ml: "ഇതിന് ഇപ്പോൾ ഒരു ആപ്പ് മാത്രം പോരാ",
+  },
+  disclaimer: {
+    en: "Kaithangu supports recovery. It does not replace medical care.",
+    ml: "കൈത്താങ്ങ് ഒരു പിന്തുണയാണ്. ഇത് ചികിത്സയ്ക്ക് പകരമല്ല.",
+  },
+  emergencyCall: { en: "In an emergency call", ml: "അടിയന്തര ഘട്ടത്തിൽ വിളിക്കൂ" },
 } as const satisfies Record<string, Record<Language, string>>;
 
 export type TextKey = keyof typeof TEXT;
 
 export function t(key: TextKey, lang: Language): string {
   return TEXT[key][lang];
+}
+
+/** Model-returned enum values, shown to the user as words rather than raw ids. */
+const LEVELS = {
+  steady: { en: "steady", ml: "സ്ഥിരം" },
+  rising: { en: "rising", ml: "ഉയരുന്നു" },
+  critical: { en: "critical", ml: "ഗുരുതരം" },
+  low: { en: "low risk", ml: "കുറഞ്ഞ അപകടം" },
+  moderate: { en: "moderate risk", ml: "ഇടത്തരം അപകടം" },
+  high: { en: "high risk", ml: "ഉയർന്ന അപകടം" },
+} as const satisfies Record<string, Record<Language, string>>;
+
+export function levelLabel(level: string | undefined, lang: Language): string {
+  if (!level) return "";
+  return LEVELS[level as keyof typeof LEVELS]?.[lang] ?? level;
+}
+
+/** "about 30 seconds" / "ഏകദേശം 30 സെക്കൻഡ്" */
+export function secondsLabel(seconds: number, lang: Language): string {
+  const rounded = Math.round(seconds);
+  return lang === "ml"
+    ? `ഏകദേശം ${rounded} സെക്കൻഡ്`
+    : `about ${rounded} seconds`;
 }
