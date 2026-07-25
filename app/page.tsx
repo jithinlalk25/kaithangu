@@ -116,9 +116,13 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
 
-          {/* `key` remounts each flow when the role changes, so a caregiver never
-              sees a plan written for the person in recovery. */}
+          {/* Each panel opens with a visually hidden h2. It keeps the document
+              outline sequential (h1 → h2 → h3) and gives screen-reader users a
+              landmark to jump to, which sighted users get from the tab itself.
+              `key` remounts each flow when the role or language changes, so a
+              caregiver never sees a plan written for the person in recovery. */}
           <TabsContent value="rescue">
+            <h2 className="sr-only">{t("rescue", lang)}</h2>
             <RescueView
               key={`rescue-${role}-${lang}`}
               role={role}
@@ -127,12 +131,15 @@ export default function Home() {
             />
           </TabsContent>
           <TabsContent value="scripts">
+            <h2 className="sr-only">{t("scripts", lang)}</h2>
             <ScriptView key={`script-${role}-${lang}`} role={role} lang={lang} />
           </TabsContent>
           <TabsContent value="prevent">
+            <h2 className="sr-only">{t("prevent", lang)}</h2>
             <PreventView key={`prevent-${role}-${lang}`} role={role} lang={lang} />
           </TabsContent>
           <TabsContent value="toolkit">
+            <h2 className="sr-only">{t("toolkit", lang)}</h2>
             <ToolkitView lang={lang} savedPlan={savedPlan} />
           </TabsContent>
         </Tabs>
