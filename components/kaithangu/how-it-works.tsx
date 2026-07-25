@@ -3,6 +3,7 @@
 import { ChevronDown } from "lucide-react";
 
 import { DEMO_MODEL } from "@/lib/models";
+import { RESOURCES } from "@/lib/resources";
 
 /**
  * Deliberately shows the machinery.
@@ -41,12 +42,12 @@ export function HowItWorks() {
           </h4>
           <ul className="list-inside list-disc space-y-1">
             <li>
-              Helpline numbers are hard-coded and human-verified. The model
-              cannot produce a phone number.
+              Every helpline shown to you is hard-coded and human-verified. The
+              model cannot add a number to that list.
             </li>
             <li>
-              The model may only cite the 14 sources in the catalogue. Invented
-              citations are dropped before rendering.
+              The model may only cite the {RESOURCES.length} sources in the
+              catalogue. Invented citations are dropped before rendering.
             </li>
             <li>
               The system prompt forbids diagnosis, dosing advice and any

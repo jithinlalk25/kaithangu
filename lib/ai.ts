@@ -1,7 +1,6 @@
 import { google } from "@ai-sdk/google";
 import {
   createTextStreamResponse,
-  generateText,
   Output,
   streamText,
   toTextStream,
@@ -17,11 +16,11 @@ import { DEMO_MODEL, DEV_MODEL } from "@/lib/models";
  * The API key is read from the environment by the provider and never leaves the
  * server - no `NEXT_PUBLIC_` variable exists for it anywhere in this repo.
  */
-export const DEFAULT_MODEL =
+const DEFAULT_MODEL =
   process.env.GEMINI_MODEL ??
   (process.env.NODE_ENV === "development" ? DEV_MODEL : DEMO_MODEL);
 
-export const model = google(DEFAULT_MODEL);
+const model = google(DEFAULT_MODEL);
 
 /**
  * Minimal thinking. Kaithangu is used mid-crisis, so first token on screen
@@ -32,6 +31,28 @@ const FAST_OPTIONS = {
   providerOptions: { google: { thinkingConfig: { thinkingLevel: "minimal" } } },
 } as const;
 
+/**
+ * Log model failures WITHOUT the request body.
+ *
+ * This is not a style preference. The AI SDK's default handler is
+ * `console.error(error)`, and an `APICallError` carries `requestBodyValues` as
+ * an own enumerable property — so Node's inspector prints the entire outbound
+ * payload: the system prompt, the user's dictated words about their addiction,
+ * and the base64 photograph of the room they are standing in. That would land
+ * in the host's runtime logs on every ordinary 429 or safety block, with no
+ * attacker involved. Only the error's shape is ever logged.
+ */
+function logModelError({ error }: { error: unknown }): void {
+  console.error("[kaithangu] model call failed:", {
+    name: error instanceof Error ? error.name : "unknown",
+    message: error instanceof Error ? error.message : String(error),
+    statusCode:
+      typeof error === "object" && error !== null && "statusCode" in error
+        ? (error as { statusCode?: number }).statusCode
+        : undefined,
+  });
+}
+
 export interface MultimodalPrompt {
   readonly system: string;
   readonly text: string;
@@ -40,7 +61,7 @@ export interface MultimodalPrompt {
 }
 
 /** Split a validated data URL into the parts the AI SDK wants. */
-export function parseImageDataUrl(
+function parseImageDataUrl(
   dataUrl: string,
 ): { mediaType: string; data: string } | undefined {
   const match = /^data:(image\/[a-z]+);base64,(.+)$/.exec(dataUrl);
@@ -72,7 +93,7 @@ function toMessages({ text, imageDataUrl }: MultimodalPrompt): ModelMessage[] {
  * Streaming is not decoration here: a partially rendered first step the user can
  * start doing beats a complete answer that arrives after the urge has won.
  */
-export function streamStructured<T>(
+function streamStructured<T>(
   schema: z.ZodType<T>,
   prompt: MultimodalPrompt,
 ) {
@@ -81,23 +102,9 @@ export function streamStructured<T>(
     output: Output.object({ schema }),
     system: prompt.system,
     messages: toMessages(prompt),
+    onError: logModelError,
     ...FAST_OPTIONS,
   });
-}
-
-/** Non-streaming variant, for callers that need the whole object at once. */
-export async function generateStructured<T>(
-  schema: z.ZodType<T>,
-  prompt: MultimodalPrompt,
-): Promise<T> {
-  const { output } = await generateText({
-    model,
-    output: Output.object({ schema }),
-    system: prompt.system,
-    messages: toMessages(prompt),
-    ...FAST_OPTIONS,
-  });
-  return output;
 }
 
 /** Wrap a structured stream in the text-stream response `useObject` consumes. */
@@ -110,5 +117,3 @@ export function structuredStreamResponse<T>(
     stream: toTextStream({ stream: result.stream }),
   });
 }
-
-export { createTextStreamResponse, generateText, Output, streamText, toTextStream };

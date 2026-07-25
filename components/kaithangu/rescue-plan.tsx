@@ -1,11 +1,12 @@
 "use client";
 
-import { AlertTriangle, Ban, MessageCircle } from "lucide-react";
+import { Ban, MessageCircle } from "lucide-react";
 
 import { Citations } from "@/components/kaithangu/citations";
 import { HandsFreeBar } from "@/components/kaithangu/hands-free-bar";
-import { Helplines } from "@/components/kaithangu/helplines";
 import { ActionList, PlainList } from "@/components/kaithangu/result/action-list";
+import { EscalationAlert } from "@/components/kaithangu/result/escalation";
+import { ResultHeader } from "@/components/kaithangu/result/result-header";
 import { ResultSection } from "@/components/kaithangu/result/result-section";
 import { SpokenLine } from "@/components/kaithangu/result/spoken-line";
 import {
@@ -13,12 +14,11 @@ import {
   StreamedPanel,
 } from "@/components/kaithangu/result/streamed-panel";
 import { UrgeTimer } from "@/components/kaithangu/urge-timer";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Language } from "@/lib/catalog";
+import type { Language, Role } from "@/lib/catalog";
 import type { Rescue } from "@/lib/schemas";
 import { toSpokenPlan } from "@/lib/spoken-plan";
-import { levelLabel, t } from "@/lib/ui-text";
+import { t } from "@/lib/ui-text";
 import { useSpeechQueue } from "@/lib/use-speech-queue";
 
 /** The streamed object, where every field may still be missing. */
@@ -37,44 +37,31 @@ type PartialRescue = {
 export function RescuePlan({
   plan,
   isLoading,
+  role,
   lang,
 }: {
   plan: PartialRescue | undefined;
   isLoading: boolean;
+  role: Role;
   lang: Language;
 }) {
   const { speak, stop, supported, speaking, activeSegment } = useSpeechQueue(lang);
 
   return (
     <StreamedPanel isLoading={isLoading}>
-      {plan?.escalate ? (
-        <div
-          role="alert"
-          className="border-destructive/40 bg-destructive/10 flex gap-3 rounded-2xl border p-4"
-        >
-          <AlertTriangle
-            className="text-destructive mt-0.5 size-5 shrink-0"
-            aria-hidden
-          />
-          <div>
-            <p className="text-destructive font-semibold">{t("needsMore", lang)}</p>
-            <p className="text-sm">{plan.escalateReason}</p>
-          </div>
-        </div>
-      ) : null}
+      <EscalationAlert
+        escalate={plan?.escalate}
+        reason={plan?.escalateReason}
+        lang={lang}
+      />
 
       <header className="space-y-3">
-        {plan?.headline ? (
-          <h3 className="text-2xl font-semibold text-balance">{plan.headline}</h3>
-        ) : (
-          <Skeleton className="h-8 w-3/4" />
-        )}
-
-        {plan?.urgency ? (
-          <Badge variant={plan.urgency === "critical" ? "destructive" : "secondary"}>
-            {levelLabel(plan.urgency, lang)}
-          </Badge>
-        ) : null}
+        <ResultHeader
+          title={plan?.headline}
+          level={plan?.urgency}
+          danger={plan?.urgency === "critical"}
+          lang={lang}
+        />
 
         {plan?.readOutLoud ? (
           <SpokenLine
@@ -124,13 +111,13 @@ export function RescuePlan({
         </ResultSection>
       ) : null}
 
-      {plan?.urgeTimerSeconds ? (
+      {/* Urge surfing is for the person having the urge; showing a caregiver a
+          craving timer would be answering the wrong question. */}
+      {role === "person" && plan?.urgeTimerSeconds ? (
         <UrgeTimer seconds={plan.urgeTimerSeconds} lang={lang} />
       ) : null}
 
       <Citations citations={plan?.education} lang={lang} />
-
-      {plan?.escalate ? <Helplines lang={lang} crisisOnly /> : null}
     </StreamedPanel>
   );
 }

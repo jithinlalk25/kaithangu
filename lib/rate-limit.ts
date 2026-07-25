@@ -12,11 +12,23 @@ const MAX_REQUESTS_PER_WINDOW = 20;
 
 const hits = new Map<string, number[]>();
 
-/** Best-effort client identity from proxy headers. */
+/**
+ * Best-effort client identity from proxy headers.
+ *
+ * Prefers `x-real-ip`, which the platform sets and a client cannot. Falls back
+ * to the LAST hop of `x-forwarded-for` - the first entry is the end a client
+ * controls, so keying on it would let anyone mint a fresh bucket per request.
+ */
 export function clientKey(request: Request): string {
+  const real = request.headers.get("x-real-ip");
+  if (real?.trim()) return real.trim();
+
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]!.trim();
-  return request.headers.get("x-real-ip") ?? "anonymous";
+  if (forwarded) {
+    const hops = forwarded.split(",");
+    return hops[hops.length - 1]!.trim();
+  }
+  return "anonymous";
 }
 
 export interface RateLimitResult {

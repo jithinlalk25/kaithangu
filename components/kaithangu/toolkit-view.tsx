@@ -62,6 +62,7 @@ export function ToolkitView({
             <Label htmlFor="anchor-name">Name</Label>
             <Input
               id="anchor-name"
+              className="h-11"
               value={anchor.name}
               autoComplete="name"
               onChange={(event) =>
@@ -74,6 +75,7 @@ export function ToolkitView({
             <Label htmlFor="anchor-phone">Phone</Label>
             <Input
               id="anchor-phone"
+              className="h-11"
               type="tel"
               inputMode="tel"
               autoComplete="tel"

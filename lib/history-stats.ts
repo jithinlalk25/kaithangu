@@ -64,10 +64,9 @@ export function summariseHistory(
   role: Role,
 ): string {
   const chips = CHIPS[role];
-  const parsed = entries.map((entry) => parseWhen(entry.when)).filter(Boolean) as {
-    day: string;
-    hour: number;
-  }[];
+  const parsed = entries
+    .map((entry) => parseWhen(entry.when))
+    .filter((when): when is { day: string; hour: number } => when !== undefined);
 
   const rows = [
     `Total entries: ${entries.length}`,
@@ -84,7 +83,7 @@ export function summariseHistory(
     line("Places", tally(entries.flatMap((e) => labelsFor(chips.places, e.places)))),
     line(
       "Urgency",
-      tally(entries.map((e) => e.urgency).filter((u): u is string => Boolean(u))),
+      tally(entries.flatMap((e) => (e.urgency ? [e.urgency] : []))),
     ),
   ];
 

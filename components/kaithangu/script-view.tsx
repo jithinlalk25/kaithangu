@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { ChipGroup } from "@/components/kaithangu/chip-group";
 import { Citations } from "@/components/kaithangu/citations";
+import { EscalationAlert } from "@/components/kaithangu/result/escalation";
 import { PlainList } from "@/components/kaithangu/result/action-list";
 import { GenerateRow } from "@/components/kaithangu/result/generate-button";
 import { ResultHeader } from "@/components/kaithangu/result/result-header";
@@ -94,6 +95,11 @@ export function ScriptView({ role, lang }: { role: Role; lang: Language }) {
 
       {isLoading || script ? (
         <StreamedPanel isLoading={isLoading}>
+          <EscalationAlert
+            escalate={script?.escalate}
+            reason={script?.escalateReason}
+            lang={lang}
+          />
           <ResultHeader title={script?.title} lang={lang}>
             <SpeakButton text={spokenScript} lang={lang} />
           </ResultHeader>

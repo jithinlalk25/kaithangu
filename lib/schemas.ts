@@ -13,8 +13,12 @@ import { z } from "zod";
 export const LIMITS = {
   maxNoteChars: 600,
   maxChipsPerGroup: 4,
-  /** ~6 MB of base64 ≈ a 4.5 MB photo. */
-  maxImageChars: 6_000_000,
+  /**
+   * ~1.1 MB of base64. `photo-input.tsx` downscales to 1024px JPEG q0.7, which
+   * lands around 200 KB, so this is generous for a real request while closing
+   * the gap an attacker could drive vision-model spend through.
+   */
+  maxImageChars: 1_500_000,
 } as const;
 
 const roleSchema = z.enum(["person", "caregiver"]);
@@ -24,12 +28,23 @@ const chipIds = z
   .max(LIMITS.maxChipsPerGroup)
   .default([]);
 
+/**
+ * A chip id, not free text. Ids are matched against the catalogue before they
+ * reach a prompt; constraining the shape here means an unknown value is rejected
+ * at the boundary rather than silently interpolated as instructions.
+ */
+const chipId = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z0-9-]+$/, "Not a valid option id");
+
 /** A data URL produced by the browser's FileReader, e.g. `data:image/jpeg;base64,...`. */
 const imageDataUrl = z
   .string()
   .max(LIMITS.maxImageChars)
   .regex(
-    /^data:image\/(jpeg|jpg|png|webp|heic);base64,[A-Za-z0-9+/=]+$/,
+    /^data:image\/(jpeg|png|webp|heic);base64,[A-Za-z0-9+/=]+$/,
     "Only base64 JPEG, PNG, WebP or HEIC images are accepted",
   );
 
@@ -51,6 +66,24 @@ export const rescueRequestSchema = z.object({
 
 export type RescueRequest = z.infer<typeof rescueRequestSchema>;
 
+/**
+ * Escalation is a field, not a hope.
+ *
+ * `SAFETY_RULES` orders the model to raise a flag when it sees signs of
+ * overdose, seizure, unsupervised withdrawal, violence or self-harm. That order
+ * is worthless unless every flow it is given to has somewhere to put the answer,
+ * so these two fields are spread into each schema whose flow can meet a live
+ * crisis, and the UI reacts to the boolean rather than to the prose.
+ */
+const escalationFields = {
+  escalate: z
+    .boolean()
+    .describe("True if this needs a helpline or emergency services now."),
+  escalateReason: z
+    .string()
+    .describe("If escalating, one line naming the medical or safety risk."),
+};
+
 const citationSchema = z.object({
   sourceId: z
     .string()
@@ -61,6 +94,10 @@ const citationSchema = z.object({
 });
 
 export const rescueSchema = z.object({
+  // Declared first on purpose: fields stream in declaration order, so putting
+  // escalation last would show the crisis banner after the whole plan had
+  // rendered - the one moment where arriving last is unacceptable.
+  ...escalationFields,
   headline: z
     .string()
     .describe("Six to ten warm words that land before anything else is read."),
@@ -93,12 +130,6 @@ export const rescueSchema = z.object({
   education: z
     .array(citationSchema)
     .describe("Two or three grounded points, each citing a catalogue source."),
-  escalate: z
-    .boolean()
-    .describe("True if this needs a helpline or emergency services now."),
-  escalateReason: z
-    .string()
-    .describe("If escalating, one line naming the medical or safety risk."),
 });
 
 export type Rescue = z.infer<typeof rescueSchema>;
@@ -110,14 +141,15 @@ export type Rescue = z.infer<typeof rescueSchema>;
 export const scriptRequestSchema = z.object({
   role: roleSchema,
   lang: languageSchema,
-  situation: z.string().min(1).max(64),
-  tone: z.string().min(1).max(32),
+  situation: chipId,
+  tone: chipId,
   note: z.string().max(LIMITS.maxNoteChars).optional(),
 });
 
 export type ScriptRequest = z.infer<typeof scriptRequestSchema>;
 
 export const scriptSchema = z.object({
+  ...escalationFields,
   title: z.string().describe("Short name for this script."),
   setup: z
     .string()
@@ -159,9 +191,9 @@ export const preventionRequestSchema = z.object({
   role: roleSchema,
   lang: languageSchema,
   /** A chip id from `CHIPS[role].upcoming`. */
-  event: z.string().min(1).max(64),
+  event: chipId,
   /** A chip id from `HORIZONS` - how soon the event is. */
-  horizon: z.string().min(1).max(32),
+  horizon: chipId,
   worries: chipIds,
   note: z.string().max(LIMITS.maxNoteChars).optional(),
 });
@@ -169,6 +201,7 @@ export const preventionRequestSchema = z.object({
 export type PreventionRequest = z.infer<typeof preventionRequestSchema>;
 
 export const preventionSchema = z.object({
+  ...escalationFields,
   title: z.string().describe("Short name for this plan."),
   riskLevel: z
     .enum(["low", "moderate", "high"])
@@ -222,11 +255,14 @@ export const patternsRequestSchema = z.object({
   entries: z
     .array(
       z.object({
-        when: z.string().max(32).describe("Weekday and hour, e.g. 'Friday 21:00'."),
+        when: z
+          .string()
+          .regex(/^[A-Za-z]{1,12} \d{2}:\d{2}$/)
+          .describe("Weekday and hour, e.g. 'Friday 21:00'."),
         situations: chipIds,
         feelings: chipIds,
         places: chipIds,
-        urgency: z.string().max(16).optional(),
+        urgency: z.enum(["steady", "rising", "critical"]).optional(),
       }),
     )
     .min(3)

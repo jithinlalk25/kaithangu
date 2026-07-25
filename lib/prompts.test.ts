@@ -106,7 +106,9 @@ describe("script prompts", () => {
       tone: "firm",
     });
     expect(prompt).toContain("Someone is offering me a drink");
-    expect(prompt).toContain("firm");
+    // Resolved through the TONES catalogue, so the label is what reaches the
+    // prompt - never the raw id, and never an unknown value.
+    expect(prompt).toContain("Firm");
     expect(prompt).toContain("said BY the person in recovery");
   });
 
@@ -118,6 +120,18 @@ describe("script prompts", () => {
       tone: "gentle",
     });
     expect(prompt).toContain("said BY the caregiver");
+  });
+
+  it("never lets an unrecognised id reach the prompt verbatim", () => {
+    const prompt = scriptPrompt({
+      role: "person",
+      lang: "en",
+      situation: "not-a-real-situation",
+      tone: "not-a-real-tone",
+    });
+    expect(prompt).not.toContain("not-a-real-situation");
+    expect(prompt).not.toContain("not-a-real-tone");
+    expect(prompt).toContain("a high-risk conversation");
   });
 
   it("keeps the safety rules in the script system prompt too", () => {

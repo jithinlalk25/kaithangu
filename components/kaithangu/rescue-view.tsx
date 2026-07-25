@@ -155,7 +155,7 @@ export function RescueView({
 
   return (
     <div className="space-y-6">
-      <RescuePlan plan={plan} isLoading={isLoading} lang={lang} />
+      <RescuePlan plan={plan} isLoading={isLoading} role={role} lang={lang} />
 
       <div className="flex flex-wrap gap-3">
         <Button variant="outline" onClick={reset} className="min-h-12">

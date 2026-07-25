@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/lib/use-local-storage";
 
 /**
- * Kaithangu — one screen, three tabs, no sign-up.
+ * Kaithangu — one screen, four tabs, no sign-up.
  *
  * Role and language are the only global state: everything downstream, including
  * every prompt sent to Gemini, is derived from them.
@@ -24,7 +24,12 @@ export default function Home() {
   const [savedPlan, setSavedPlan] = useLocalStorage<string>("kaithangu.plan", "");
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col px-4 pb-16">
+    // `lang` marks the whole app, so a screen reader switches voice with the
+    // toggle instead of reading Malayalam with an English one.
+    <div
+      lang={lang}
+      className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col px-4 pb-16"
+    >
       <a
         href="#main"
         className="bg-primary text-primary-foreground sr-only rounded-md px-4 py-2 focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
@@ -143,7 +148,12 @@ export default function Home() {
           </TabsContent>
           <TabsContent value="toolkit">
             <h2 className="sr-only">{t("toolkit", lang)}</h2>
-            <ToolkitView role={role} lang={lang} savedPlan={savedPlan} />
+            <ToolkitView
+              key={`toolkit-${role}-${lang}`}
+              role={role}
+              lang={lang}
+              savedPlan={savedPlan}
+            />
           </TabsContent>
         </Tabs>
       </main>

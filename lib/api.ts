@@ -5,7 +5,7 @@ import { checkRateLimit, clientKey } from "@/lib/rate-limit";
 /**
  * Shared guard rail for every AI route: rate limit, then validate.
  *
- * Both routes are public and both spend money, so neither is allowed to reach
+ * Every route is public and every route spends money, so none is allowed to reach
  * the model with unvalidated input. Errors are returned as plain JSON with the
  * right status code and never leak an internal message to the client.
  */

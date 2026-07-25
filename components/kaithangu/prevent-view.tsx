@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { ChipGroup } from "@/components/kaithangu/chip-group";
 import { Citations } from "@/components/kaithangu/citations";
+import { EscalationAlert } from "@/components/kaithangu/result/escalation";
 import { ActionList, PlainList } from "@/components/kaithangu/result/action-list";
 import { GenerateRow } from "@/components/kaithangu/result/generate-button";
 import { ResultHeader } from "@/components/kaithangu/result/result-header";
@@ -96,6 +97,11 @@ export function PreventView({ role, lang }: { role: Role; lang: Language }) {
 
       {isLoading || plan ? (
         <StreamedPanel isLoading={isLoading}>
+          <EscalationAlert
+            escalate={plan?.escalate}
+            reason={plan?.escalateReason}
+            lang={lang}
+          />
           <ResultHeader
             title={plan?.title}
             level={plan?.riskLevel}

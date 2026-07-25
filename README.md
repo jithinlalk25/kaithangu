@@ -29,7 +29,7 @@ is short, physical, and doable without leaving the room.
 | Requirement | Where it lives | What it actually does |
 |---|---|---|
 | **Multi-modal** | `components/kaithangu/{chip-group,voice-input,photo-input,speak-button,hands-free-bar}.tsx` | Three real input modes — tap, speech (Web Speech API, `en-IN`/`ml-IN`), and camera → Gemini vision reads the room you are standing in. Two output modes — screen, and **hands-free playback** that talks you through the plan step by step, highlighting each step as it is spoken. |
-| **Zero-typing interventions** | `components/kaithangu/rescue-view.tsx`, `app/api/rescue/route.ts` | A panic button, then 2–3 taps, produces a situation-specific intervention. An "I cannot answer anything" path skips even the chips. No keyboard is ever required — and with hands-free, no reading either. |
+| **Zero-typing interventions** | `components/kaithangu/rescue-view.tsx`, `app/api/rescue/route.ts` | A panic button, then 2–3 taps, produces a situation-specific intervention. An "I cannot answer anything" path skips even the chips. No keyboard is required on any AI flow, and with hands-free, no reading either. (The one place you can type is saving an anchor contact's name and number in the Safety kit — a setup step, not a crisis step.) |
 | **Personalised emergency scripts** | `components/kaithangu/script-view.tsx`, `app/api/script/route.ts` | The exact words to say in 8 named high-risk situations per role — in English *and* Malayalam — plus the pushbacks that actually follow ("just one, for me") with a reply for each, and a way out of the room. |
 | **Backed by educational resources** | `lib/resources.ts`, `components/kaithangu/citations.tsx` | A hand-verified catalogue of 14 sources (WHO, NIDA, SAMHSA, NIMHANS, Tele-MANAS, Kerala's Vimukthi mission, NA/AA India). The model may cite **only** these ids; anything it invents is dropped before render. See "The anti-hallucination guarantee" below. |
 | **Prevention**, not only recovery | `components/kaithangu/prevent-view.tsx`, `app/api/prevent/route.ts` | Most lapses happen in a small number of predictable situations, so the highest-leverage moment is the week before the wedding, not the craving. Name an upcoming high-risk event and get a plan: what to do before, what to do on the day, a ready-made exit line, exactly what to ask one ally for, and the early warning signs. |
@@ -47,17 +47,25 @@ helpline will invent a plausible phone number. In a substance-use crisis app tha
 not a quality problem, it is a safety problem. Kaithangu makes it structurally
 impossible rather than merely discouraged:
 
-1. **Helpline numbers are never generated.** They are a hand-verified constant in
-   `lib/resources.ts`, rendered as `tel:` links. The output schema has no field a
-   phone number could occupy.
+1. **Helpline numbers are never generated.** Every number the app offers to dial is a
+   hand-verified constant in `lib/resources.ts`, rendered as a `tel:` link. The model
+   cannot add an entry to that list. It is not prevented from typing digits inside a
+   free-text field, so this is a guarantee about what Kaithangu *offers*, not a claim
+   that the model is incapable of producing a numeral.
 2. **Citations are closed-vocabulary.** The system prompt shows the model the
    catalogue and permits only its `id`s. `resolveCitations()` then looks every id up
    and silently discards misses — a fabricated source cannot reach the screen.
 3. **The system prompt has hard safety rules** (`lib/prompts.ts`): no diagnosis, no
    dosing, never "just one", and mandatory escalation on any sign of overdose,
    seizure, unsupervised alcohol/sedative withdrawal, violence or self-harm.
-4. **Escalation is a schema field, not a hope.** When `escalate` is true the UI shows
-   a crisis banner and pushes the emergency helplines to the top.
+4. **Escalation is a schema field, not a hope.** `escalate` and `escalateReason` are the
+   *first* fields in the rescue, script and prevention schemas — first because fields
+   stream in declaration order, so a crisis banner declared last would arrive after the
+   whole plan had rendered. When `escalate` is true, `EscalationAlert` renders the banner
+   **and the emergency helplines directly beneath it**, above everything else. The
+   patterns flow is deliberately excluded: it reflects on past entries rather than a live
+   moment, so it is the one prompt that is not given the escalation rule — an instruction
+   to raise a flag no schema can carry would be a dead letter.
 
 ---
 
@@ -97,6 +105,8 @@ two cannot drift.
 | `lib/api.ts`, `lib/rate-limit.ts` | Shared route guard: rate limit → validate → typed error |
 | `app/api/*/route.ts` | Thin handlers; no business logic |
 | `components/kaithangu/*` | One component per idea, each with a stated reason to exist |
+| `components/kaithangu/result/*` | Shared result primitives every flow composes (section, header, lists, streamed panel, escalation alert) |
+| `components/ui/*` | Unmodified shadcn/Radix output, vendored by the CLI — not hand-written |
 
 ---
 
@@ -132,9 +142,16 @@ leaves the device and no second vendor is involved.
 - Every request body is validated with zod before it can reach the model, with hard
   caps on note length, chip count and image size, and a strict allow-list on image
   media types.
-- Per-IP rate limiting on both AI routes (`lib/rate-limit.ts`).
+- Per-IP rate limiting on **all four** AI routes (`lib/rate-limit.ts`), keyed on
+  `x-real-ip` rather than the client-controlled first hop of `x-forwarded-for`.
 - Errors are logged server-side and returned as generic typed JSON; internal messages
   are never leaked to the client.
+- **Model failures are logged without the request body.** The AI SDK's default handler
+  prints the whole error, and an `APICallError` carries `requestBodyValues` — which would
+  put the user's dictated words and the base64 photo of their room into the host's logs on
+  every ordinary 429. `logModelError` in `lib/ai.ts` logs only name, message and status.
+- User text is delimited as `<user_words>` and the system prompt states it is data, never
+  instructions; the escalation flag is explicitly not overridable by anything in it.
 - **No account, no database, no analytics.** The anchor contact and saved plan live in
   `localStorage` on the user's own device. There is no server-side record that anyone
   used this app — which, for this user group, is a feature.
@@ -143,14 +160,16 @@ leaves the device and no second vendor is involved.
 
 Cognitive accessibility *is* the product here, so it is treated as a requirement:
 
-- Every tap target is at least 44px; the panic button is far larger.
+- Every interactive target is at least 44px, inputs included; the panic button is far larger.
 - Chips are real buttons in labelled groups with `aria-pressed`; streamed regions are
   `aria-live="polite"` with `aria-busy`, so a screen reader follows the plan as it
   arrives.
 - Skip link, semantic landmarks and headings, visible focus rings throughout.
 - Every plan can be read aloud, for users who cannot read a screen in that moment.
-- Full Malayalam interface *and* Malayalam model output, with `lang` attributes set
-  correctly for screen readers.
+- Full Malayalam model output, and a Malayalam interface across every screen on the AI
+  flows. The app shell carries `lang`, so a screen reader switches voice with the toggle
+  instead of reading Malayalam with an English one. Known gap: the trust panel, the error
+  screen and the toast messages are still English-only.
 - `prefers-reduced-motion` is respected; the breathing animation stops for users who
   ask for it.
 - Colour is never the only signal, and red is reserved exclusively for real escalation.
@@ -158,7 +177,7 @@ Cognitive accessibility *is* the product here, so it is treated as a requirement
 ## Testing and verification
 
 ```bash
-npm test        # 77 unit tests
+npm test        # 79 unit tests
 ```
 
 Unit tests cover the parts where a silent regression would be dangerous: the citation
@@ -171,7 +190,7 @@ build rather than assumed:
 
 - **Lighthouse (mobile, production):** Accessibility **100**, Best Practices **100**,
   SEO **100** — 53 audits passed, 0 failed.
-- **All three AI routes** were driven end-to-end against production and return real,
+- **All four AI routes** were driven end-to-end against production and return real,
   situation-specific Gemini output — including the full Malayalam caregiver path.
 - **Multi-modal input was verified, not assumed.** `scripts/vision-check.mjs` sends an
   image straight to the model and prints what it can see, and the rescue route was
@@ -179,6 +198,10 @@ build rather than assumed:
   ("turn your back to the table with the green bottle, brown bottle, and yellow
   glasses"). A feature that only *looks* like it works is worse than no feature.
 - **Input validation** was confirmed live: malformed bodies get `400`, not a model call.
+- **Every citation link was checked from India** with `scripts/check-links.mjs`. That
+  caught three real failures — samhsa.gov returns 403 to Indian traffic, and both
+  `telemanas.mohfw.gov.in` and `nimhans.ac.in` time out — which is why some sources now
+  point elsewhere and one is cited by name with no link at all.
 - Zero console errors or warnings on the deployed app.
 
 ## Running locally
@@ -194,6 +217,8 @@ npm run dev
 | `npm run dev` | Local development |
 | `npm run build` | Production build + typecheck |
 | `npm test` | Unit tests |
+| `node scripts/check-links.mjs` | Verify every citation URL still resolves |
+| `node scripts/vision-check.mjs <img>` | Confirm the model really can see an image |
 | `npm run typecheck` | Types only |
 | `npm run lint` | ESLint |
 

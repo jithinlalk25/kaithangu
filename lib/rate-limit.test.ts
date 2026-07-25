@@ -31,11 +31,23 @@ describe("rate limiter", () => {
 });
 
 describe("client identity", () => {
-  it("takes the first hop of x-forwarded-for", () => {
+  it("prefers x-real-ip, which a client cannot set", () => {
+    const request = new Request("https://kaithangu.app/api/rescue", {
+      headers: {
+        "x-real-ip": "198.51.100.4",
+        "x-forwarded-for": "203.0.113.9, 70.41.3.18",
+      },
+    });
+    expect(clientKey(request)).toBe("198.51.100.4");
+  });
+
+  it("falls back to the LAST hop of x-forwarded-for, not the first", () => {
+    // The first entry is the end a client controls: keying on it would let
+    // anyone mint a fresh bucket per request and bypass the limit entirely.
     const request = new Request("https://kaithangu.app/api/rescue", {
       headers: { "x-forwarded-for": "203.0.113.9, 70.41.3.18" },
     });
-    expect(clientKey(request)).toBe("203.0.113.9");
+    expect(clientKey(request)).toBe("70.41.3.18");
   });
 
   it("falls back when no proxy header is present", () => {
