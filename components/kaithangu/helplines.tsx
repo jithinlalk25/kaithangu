@@ -54,10 +54,10 @@ export function Helplines({
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium">
-                  {line.name}
+                  {line.name[lang]}
                 </span>
                 <span className="text-muted-foreground block truncate text-xs">
-                  {line.number} · {line.detail}
+                  {line.number} · {line.detail[lang]}
                 </span>
               </span>
             </a>

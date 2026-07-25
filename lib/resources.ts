@@ -162,50 +162,71 @@ const RESOURCE_INDEX: ReadonlyMap<string, Resource> = new Map(
   RESOURCES.map((resource) => [resource.id, resource]),
 );
 
-/** Real, dialable helplines. Ordered most-specific-to-Kerala first. */
+/**
+ * Real, dialable helplines. Ordered most-specific-to-Kerala first.
+ *
+ * Bilingual like the rest of the interface: these sit on the landing screen,
+ * which is the one screen a person in crisis is guaranteed to see, so leaving
+ * them in English would undo the point of the language toggle.
+ */
 export interface Helpline {
-  readonly name: string;
+  readonly name: { readonly en: string; readonly ml: string };
   readonly number: string;
-  readonly detail: string;
+  readonly detail: { readonly en: string; readonly ml: string };
   /** Surfaced first when the model flags a situation as unsafe. */
   readonly crisis: boolean;
 }
 
 export const HELPLINES: readonly Helpline[] = [
   {
-    name: "Emergency services",
+    name: { en: "Emergency services", ml: "അടിയന്തര സഹായം" },
     number: "112",
-    detail: "Overdose, seizure, unconsciousness or immediate danger",
+    detail: {
+      en: "Overdose, seizure, unconsciousness or immediate danger",
+      ml: "അമിത ഉപയോഗം, അപസ്മാരം, ബോധക്ഷയം അല്ലെങ്കിൽ ഉടനടി അപകടം",
+    },
     crisis: true,
   },
   {
-    name: "Vimukthi de-addiction helpline",
+    name: { en: "Vimukthi de-addiction helpline", ml: "വിമുക്തി ലഹരിവിമുക്ത ഹെൽപ്പ് ലൈൻ" },
     number: "14405",
-    detail: "Kerala State Excise - free, Malayalam and English",
+    detail: {
+      en: "Kerala State Excise - free, Malayalam and English",
+      ml: "കേരള എക്സൈസ് - സൗജന്യം, മലയാളത്തിലും ഇംഗ്ലീഷിലും",
+    },
     crisis: false,
   },
   {
-    name: "Tele-MANAS",
+    name: { en: "Tele-MANAS", ml: "ടെലി-മനസ്" },
     number: "14416",
-    detail: "Govt. of India 24x7 mental health support",
+    detail: {
+      en: "Govt. of India 24x7 mental health support",
+      ml: "ഇന്ത്യാ ഗവൺമെന്റ് - 24x7 മാനസികാരോഗ്യ പിന്തുണ",
+    },
     crisis: true,
   },
   {
-    name: "KIRAN mental health helpline",
+    name: { en: "KIRAN mental health helpline", ml: "കിരൺ മാനസികാരോഗ്യ ഹെൽപ്പ് ലൈൻ" },
     number: "1800-599-0019",
-    detail: "Govt. of India, 13 languages, 24x7",
+    detail: {
+      en: "Govt. of India, 13 languages, 24x7",
+      ml: "ഇന്ത്യാ ഗവൺമെന്റ്, 13 ഭാഷകൾ, 24x7",
+    },
     crisis: true,
   },
   {
-    name: "DISHA health helpline",
+    name: { en: "DISHA health helpline", ml: "ദിശ ആരോഗ്യ ഹെൽപ്പ് ലൈൻ" },
     number: "1056",
-    detail: "Kerala Government health information and referral",
+    detail: {
+      en: "Kerala Government health information and referral",
+      ml: "കേരള സർക്കാർ ആരോഗ്യ വിവരവും റഫറലും",
+    },
     crisis: false,
   },
   {
-    name: "Vandrevala Foundation",
+    name: { en: "Vandrevala Foundation", ml: "വന്ദ്രേവാല ഫൗണ്ടേഷൻ" },
     number: "9999666555",
-    detail: "24x7 free counselling",
+    detail: { en: "24x7 free counselling", ml: "24x7 സൗജന്യ കൗൺസലിംഗ്" },
     crisis: false,
   },
 ];

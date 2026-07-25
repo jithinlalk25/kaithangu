@@ -47,7 +47,7 @@ export default function Error({
               href={`tel:${line.number.replace(/[^0-9+]/g, "")}`}
               className="border-border bg-card hover:bg-secondary flex min-h-14 items-center justify-between rounded-xl border px-4 py-3"
             >
-              <span className="text-sm font-medium">{line.name}</span>
+              <span className="text-sm font-medium">{line.name.en}</span>
               <span className="text-muted-foreground text-sm">{line.number}</span>
             </a>
           </li>

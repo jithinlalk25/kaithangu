@@ -96,4 +96,14 @@ describe("helplines", () => {
     const crisis = HELPLINES.filter((line) => line.crisis);
     expect(crisis.map((line) => line.number)).toContain("112");
   });
+
+  it("names and describes every helpline in both languages", () => {
+    // These sit on the landing screen, the one screen a person in crisis is
+    // guaranteed to see, so an English-only entry would defeat the toggle.
+    for (const line of HELPLINES) {
+      expect(/[ഀ-ൿ]/.test(line.name.ml), line.number).toBe(true);
+      expect(/[ഀ-ൿ]/.test(line.detail.ml), line.number).toBe(true);
+      expect(line.name.en.length, line.number).toBeGreaterThan(0);
+    }
+  });
 });
